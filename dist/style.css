@@ -15,3 +15,14 @@ main{height:calc(100% - 70px)}
 .stage{bottom:100px;left:5%;right:5%;pointer-events:none}.stage>span{display:none}.stage>div{font-size:10px;padding:3px 5px;width:fit-content;background:#dce8ddc9;border-radius:3px}
 #paused{top:auto;bottom:135px;left:20%;width:60%}
 @container(max-width:350px){header{padding:0 8px}.telemetry{padding:0;gap:8px}.metrics{gap:8px}.metrics label{display:none}.metrics b{font-size:17px}.speed strong{font-size:20px}.air{min-width:52px}.bottom{padding:0 8px}.bottom nav{gap:5px}.stage{bottom:80px}#paused{bottom:115px}}
+/* SVG files render button labels as images; no selectable button text. */
+main,.telemetry,.bottom,button,button img{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+button{touch-action:manipulation}button img{display:block;width:100%;height:100%;pointer-events:none;-webkit-user-drag:none;object-fit:contain}
+.controls button{padding:0;border:0;background:none;box-shadow:0 3px 0 #10252a;border-radius:8px;aspect-ratio:120/132;touch-action:none}
+.controls button.active{border:0;transform:translateY(3px);box-shadow:none;background:none;filter:brightness(1.3)}
+button.image-button{padding:0;border:0;background:none;line-height:normal}
+article>button.image-button{height:48px;width:100%}
+.bottom button.image-button{padding:0;border:0;background:none;min-width:0;height:28px}
+.bottom #restart{width:56px}.bottom #pause,.bottom #help{width:31px}.bottom #sound{width:70px}
+@container(max-width:350px){.controls button{padding:0}.stage{bottom:100px}#paused{bottom:128px}.bottom nav{gap:5px}}
+@container(min-width:351px){.stage{bottom:130px}#paused{bottom:158px}}

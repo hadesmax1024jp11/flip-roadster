@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+const dir=new URL('../dist/assets/buttons/',import.meta.url);fs.mkdirSync(dir,{recursive:true});
+function svg(name,w,h,content,bg='#173037',fg='#e6efea'){
+ fs.writeFileSync(new URL(name+'.svg',dir),`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><rect x="1" y="1" width="${w-2}" height="${h-2}" rx="12" fill="${bg}" stroke="#75948a" stroke-width="2"/><g fill="${fg}" stroke="${fg}" font-family="Arial,Microsoft JhengHei,sans-serif" text-anchor="middle">${content}</g></svg>`);
+}
+const text=(x,y,size,s)=>`<text x="${x}" y="${y}" font-size="${size}" font-weight="700" stroke="none">${s}</text>`;
+const icons={stick:'<path d="M38 39v20a22 22 0 0 0 44 0V39H68v20a8 8 0 0 1-16 0V39Z" fill="none" stroke-width="5"/><path d="M38 48h14m16 0h14" stroke-width="4"/>',left:'<path d="M82 56H38m16-17L37 56l17 17" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>',right:'<path d="M38 56h44M66 39l17 17-17 17" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>',drive:'<path d="M60 79V40M42 57l18-18 18 18" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>'};
+for(const [name,label,key] of [['stick','吸附','X'],['left','左噴射','←'],['right','右噴射','→'],['drive','加速','SPACE']])svg(name,120,132,text(60,22,13,key)+icons[name]+text(60,112,22,label),name==='drive'?'#dbfa8f':'#173037',name==='drive'?'#19342e':'#e6efea');
+for(const [name,label] of [['start','開始試駕  ↗'],['again','再試一次  ↗']])svg(name,360,58,text(180,38,22,label),'#dbfa8f','#19342e');
+for(const [name,label] of [['restart','↻ 重來'],['pause','Ⅱ'],['resume','▶'],['sound-off','音效 OFF'],['sound-on','音效 ON'],['help','?']])svg(name,name.startsWith('sound')?100:name==='restart'?80:44,40,text(name.startsWith('sound')?50:name==='restart'?40:22,27,name==='help'?24:16,label));
