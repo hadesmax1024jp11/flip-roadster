@@ -22,12 +22,12 @@ test('inverted thrust pushes down, upright thrust brakes',()=>{for(const roll of
 test('single thruster rolls and air never goes negative',()=>{const g={...fresh(),phase:'flight',x:-10,y:100,air:.01};step(g,{left:true},.01);assert.ok(g.omega>0);assert.equal(g.air,0);});
 test('safe landing scores; inverted and hard impacts fail',()=>{const g={...fresh(),pitch:Math.PI,roll:Math.PI,vy:-2,travel:Math.PI};assert.equal(grade(g).ok,true);assert.ok(grade(g).score>80);assert.equal(grade({...g,roll:0}).ok,false);assert.equal(grade({...g,vy:-15}).ok,false);});
 
-test('paired jets hold height while preserving forward glide across frame rates',()=>{
+test('paired jets reverse descent and climb while preserving forward glide across frame rates',()=>{
  for(const dt of [1/60,1/120,1/240]){
   const g={...fresh(),phase:'flight',x:-10,y:25,pitch:Math.PI,roll:Math.PI,vx:-20,vy:-3};
   for(let t=0;t<3;t+=dt)step(g,{left:true,right:true},dt);
   assert.equal(g.phase,'flight');assert.ok(g.x< -69);assert.equal(g.vx,-20);
-  assert.ok(Math.abs(g.vy+.12)<.02);assert.ok(g.y>23&&g.y<25);assert.ok(g.air>50);
+  assert.ok(g.vy>22&&g.vy<24);assert.ok(g.y>54&&g.y<57);assert.ok(g.air>50);
  }
 });
 test('upright glide falls gently and empty jets cannot hover',()=>{
@@ -49,6 +49,14 @@ test('lane assist recovers lateral drift and auto-levels an upright car',()=>{
  for(const dt of [1/60,1/120,1/240])for(const side of [-1,1]){
   const g={...fresh(),phase:'flight',x:-10,y:100,pitch:Math.PI,roll:Math.PI+.4*side,z:3*side,vz:5*side,vx:-20};
   for(let t=0;t<4;t+=dt)step(g,{left:true,right:true},dt);
-  assert.ok(Math.abs(g.z)<.08);assert.ok(Math.abs(g.roll-Math.PI)<.01);assert.equal(g.vx,-20);
+  assert.ok(Math.abs(g.z)<.08);assert.ok(Math.abs(g.roll-Math.PI)<.01);assert.ok(Math.abs(g.vx+20)<.001);
  }
+});
+
+test('paired thrust adds lift, tilt changes direction, release restores gravity',()=>{
+ const make=()=>({...fresh(),phase:'flight',x:-20,y:100});
+ const off=make(),single=make(),both=make();step(off,{},.001);step(single,{left:true},.001);step(both,{left:true,right:true},.001);
+ assert.ok(both.vy>0);assert.ok(single.vy>off.vy);assert.ok(Math.abs((both.vy-off.vy)-2*(single.vy-off.vy))<.00001);assert.equal(both.omega,0);
+ const tilt={...make(),pitch:Math.PI/4};step(tilt,{left:true,right:true},.01);assert.ok(tilt.vx<0);
+ const before=both.vy;step(both,{},.01);assert.ok(both.vy<before);
 });
