@@ -26,7 +26,7 @@ test('paired jets reverse descent and climb while preserving forward glide acros
  for(const dt of [1/60,1/120,1/240]){
   const g={...fresh(),phase:'flight',x:-10,y:25,pitch:Math.PI,roll:Math.PI,vx:-20,vy:-3};
   for(let t=0;t<3;t+=dt)step(g,{left:true,right:true},dt);
-  assert.equal(g.phase,'flight');assert.ok(g.x< -69);assert.equal(g.vx,-20);
+  assert.equal(g.phase,'flight');assert.ok(g.x< -69);assert.ok(g.vx< -23);
   assert.ok(g.vy>22&&g.vy<24);assert.ok(g.y>54&&g.y<57);assert.ok(g.air>50);
  }
 });
@@ -49,7 +49,7 @@ test('lane assist recovers lateral drift and auto-levels an upright car',()=>{
  for(const dt of [1/60,1/120,1/240])for(const side of [-1,1]){
   const g={...fresh(),phase:'flight',x:-10,y:100,pitch:Math.PI,roll:Math.PI+.4*side,z:3*side,vz:5*side,vx:-20};
   for(let t=0;t<4;t+=dt)step(g,{left:true,right:true},dt);
-  assert.ok(Math.abs(g.z)<.08);assert.ok(Math.abs(g.roll-Math.PI)<.01);assert.ok(Math.abs(g.vx+20)<.001);
+  assert.ok(Math.abs(g.z)<.08);assert.ok(Math.abs(g.roll-Math.PI)<.01);assert.ok(g.vx< -24);
  }
 });
 
@@ -62,3 +62,14 @@ test('paired thrust adds lift, tilt changes direction, release restores gravity'
 });
 
 test('perfect landing earns 50 bonus; tilted hard or spinning contacts do not',()=>{const base={...fresh(),vy:-2};const perfect=grade(base);assert.equal(perfect.bonus,50);assert.equal(perfect.perfect,true);for(const change of [{roll:.2},{vy:-4},{omega:1},{roll:Math.PI}]){const r=grade({...base,...change});assert.equal(r.bonus,0);assert.equal(r.perfect,false);}assert.equal(perfect.score,94);});
+
+test('nose-down trim gives jet-powered forward thrust in both headings, without free propulsion',()=>{
+ for(const dt of [1/60,1/120,1/240])for(const direction of [-1,1]){
+  const base={...fresh(),phase:'flight',x:-30,y:100,pitch:direction<0?Math.PI:0,roll:direction<0?Math.PI:0,vx:20*direction};
+  const powered={...base},coasting={...base};
+  for(let i=0;i<Math.round(2/dt);i++){step(powered,{left:true,right:true},dt);step(coasting,{},dt);}
+  assert.ok(Math.sin(powered.pitch)<-.09,'nose points gently down');
+  assert.ok(direction*powered.vx>22);assert.equal(coasting.vx,20*direction);
+  assert.ok(powered.vy>0);assert.ok(Math.abs(grade({...powered,vy:-1}).tilt-6)<.2);
+ }
+});

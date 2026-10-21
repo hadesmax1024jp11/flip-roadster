@@ -41,6 +41,14 @@ if(g.phase==='flight'){
  const rollError=Math.atan2(Math.sin(targetRoll-g.roll),Math.cos(targetRoll-g.roll));
  g.omega+=((Number(l)-Number(r))*2*JET_THRUST*.95/ROLL_INERTIA+(leveling?8*rollError:0)-g.omega*(leveling?4.5:1.8))*dt;
  g.roll+=g.omega*dt;g.travel+=Math.abs(g.omega*dt);
+ // Flight trim: smoothly lower the nose by six degrees once clear and upright.
+ // This rotates the existing jet force forward, rather than adding free thrust.
+ if(!g.departureContact&&Math.cos(g.pitch)*Math.cos(g.roll)>.85){
+  const heading=Math.cos(g.pitch)<0?Math.PI:0;
+  const targetPitch=heading+(heading?1:-1)*Math.PI/30;
+  const pitchError=Math.atan2(Math.sin(targetPitch-g.pitch),Math.cos(targetPitch-g.pitch));
+  g.pitch+=pitchError*(1-Math.exp(-2*dt));
+ }
  const upright=Math.cos(g.pitch)*Math.cos(g.roll);
  // Conserve forward momentum; aerodynamic lift supports a moving upright car.
  const glide=Math.max(0,upright)*Math.min(1,Math.abs(g.vx)/10);
