@@ -18,6 +18,23 @@ test('leaving the wall does not force a later safe landing to fail',()=>{const g
 test('wall collision respects finite road width',()=>{assert.equal(hitsWall({...fresh(),x:30,y:12,z:0}),true);assert.equal(hitsWall({...fresh(),x:30,y:12,z:8}),false);});
 test('drive and stick launch inverted',()=>{const g=fresh();for(let i=0;i<1800&&g.phase==='track';i++)step(g,{drive:true,stick:true},1/120);assert.equal(g.phase,'flight');assert.ok(Math.abs(g.pitch-Math.PI)<.01);assert.ok(g.vx<0);assert.ok(g.air<100);});
 test('without stick overhang peels off',()=>{const g=fresh();for(let i=0;i<1800&&g.phase==='track';i++)step(g,{drive:true},1/120);assert.match(g.reason,/吸附/);});
-test('inverted thrust pushes down, upright thrust brakes',()=>{for(const roll of [0,Math.PI]){const g={...fresh(),phase:'flight',x:-10,y:20,pitch:Math.PI,roll};step(g,{left:true,right:true},.01);assert.equal(g.vy>0,roll===Math.PI);assert.equal(g.omega,0);}});
+test('inverted thrust pushes down, upright thrust brakes',()=>{for(const roll of [0,Math.PI]){const g={...fresh(),phase:'flight',x:-10,y:20,pitch:Math.PI,roll,vy:-2};step(g,{left:true,right:true},.01);assert.equal(g.vy> -2,roll===Math.PI);assert.equal(g.omega,0);}});
 test('single thruster rolls and air never goes negative',()=>{const g={...fresh(),phase:'flight',x:-10,y:100,air:.01};step(g,{left:true},.01);assert.ok(g.omega>0);assert.equal(g.air,0);});
 test('safe landing scores; inverted and hard impacts fail',()=>{const g={...fresh(),pitch:Math.PI,roll:Math.PI,vy:-2,travel:Math.PI};assert.equal(grade(g).ok,true);assert.ok(grade(g).score>80);assert.equal(grade({...g,roll:0}).ok,false);assert.equal(grade({...g,vy:-15}).ok,false);});
+
+test('paired jets hold height while preserving forward glide across frame rates',()=>{
+ for(const dt of [1/60,1/120,1/240]){
+  const g={...fresh(),phase:'flight',x:-10,y:25,pitch:Math.PI,roll:Math.PI,vx:-20,vy:-3};
+  for(let t=0;t<3;t+=dt)step(g,{left:true,right:true},dt);
+  assert.equal(g.phase,'flight');assert.ok(g.x< -69);assert.equal(g.vx,-20);
+  assert.ok(Math.abs(g.vy+.12)<.02);assert.ok(g.y>23&&g.y<25);assert.ok(g.air>50);
+ }
+});
+test('upright glide falls gently and empty jets cannot hover',()=>{
+ const g={...fresh(),phase:'flight',x:-10,y:100,pitch:Math.PI,roll:Math.PI,vx:-20,air:0};
+ for(let i=0;i<120;i++)step(g,{left:true,right:true},1/120);
+ assert.equal(g.vx,-20);assert.ok(g.vy< -5&&g.vy> -6);assert.ok(g.y<98);
+ const stationary={...fresh(),phase:'flight',x:-10,y:100,air:0};
+ for(let i=0;i<120;i++)step(stationary,{},1/120);
+ assert.ok(stationary.vy< -9);
+});
