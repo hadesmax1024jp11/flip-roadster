@@ -1,4 +1,5 @@
 import * as THREE from './vendor/three.module.js';
+import {createRoadster} from './roadster.js?v=5';
 import {fresh,step,R,WALL,pose,END} from './physics.js?v=3';
 const $=id=>document.getElementById(id),host=$('scene');let renderer;
 try{renderer=new THREE.WebGLRenderer({antialias:true});}catch(e){$('hint').textContent='此裝置無法啟動 WebGL，請使用支援 WebGL 的瀏覽器。';$('start').disabled=true;throw e;}
@@ -16,11 +17,21 @@ for(let i=1;i<=7;i++){const t=i/8*Math.PI,x=WALL+(R+.2)*Math.sin(t),y=R*(1-Math.
 for(let x=-80;x<18;x+=12){box(.12,.035,9,white,x,.045,0);}for(let x=-90;x<60;x+=18){box(.18,6,.18,steel,x,3,-15);box(2,.15,.6,white,x,6,-15);}
 // Landing zone, independently modelled without source artwork.
 box(34,.025,14,mat('#7d9886'),-28,.05,0);for(let x=-44;x<-10;x+=3){for(let z of [-6.8,6.8])box(1.4,.045,.23,lime,x,.075,z);}for(let x=-45;x<-42;x+=.7)for(let z=-6;z<6;z+=.7)box(.7,.04,.7,(Math.round((x+45)/.7)+Math.round((z+6)/.7))%2?dark:white,x,.08,z);
+
+// Original supplied logo, painted directly onto the acceleration lane.
+const logoTexture=new THREE.TextureLoader().load('./assets/party-logo.png');
+logoTexture.colorSpace=THREE.SRGBColorSpace;
+logoTexture.anisotropy=renderer.capabilities.getMaxAnisotropy();
+const logoMaterial=new THREE.MeshBasicMaterial({map:logoTexture,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2});
+for(const x of [-17,-2,12]){
+ const decal=new THREE.Mesh(new THREE.PlaneGeometry(10.5,10.5*1041/3049),logoMaterial);
+ decal.rotation.set(-Math.PI/2,0,-Math.PI/2);decal.position.set(x,.105,0);decal.renderOrder=2;scene.add(decal);
+}
+
 function sign(text,x,y,z,size=1){const c=document.createElement('canvas');c.width=1024;c.height=256;const ctx=c.getContext('2d');ctx.fillStyle='#173037';ctx.fillRect(0,0,1024,256);ctx.fillStyle='#dafa8e';ctx.font='bold 95px sans-serif';ctx.textAlign='center';ctx.fillText(text,512,163);const m=new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c)});const s=new THREE.Mesh(new THREE.PlaneGeometry(12*size,3*size),m);s.position.set(x,y,z);scene.add(s);return s;}
 sign('FLIP / 001',29,12,-5.5,1.4);sign('LANDING ZONE',-28,1,-9,.9);
 for(let i=0;i<15;i++){const x=-85+i*11,z=-30-(i%3)*10;box(5+(i%2)*2,3+i%4,4,mat(i%2?'#87a397':'#759487'),x,(3+i%4)/2-.2,z);}
-const car=new THREE.Group();scene.add(car);const body=mat('#d9f989',{metalness:.4,roughness:.3});box(3.6,.52,1.8,body,0,.1,0,car);box(1.65,.5,1.5,dark,-.25,.6,0,car);box(1.35,.08,1.52,body,-.3,.9,0,car);box(.1,.22,1.3,dark,1.82,.1,0,car);box(.1,.16,.5,white,1.88,.25,-.59,car);box(.1,.16,.5,white,1.88,.25,.59,car);box(.1,.14,1.5,mat('#ff715b',{emissive:'#ff3520',emissiveIntensity:.5}),-1.82,.2,0,car);
-const wheels=[];for(const x of [-1.12,1.12])for(const z of [-.95,.95]){const w=new THREE.Mesh(new THREE.CylinderGeometry(.4,.4,.3,18),dark);w.rotation.x=Math.PI/2;w.position.set(x,-.3,z);car.add(w);wheels.push(w);const hub=new THREE.Mesh(new THREE.CylinderGeometry(.21,.21,.315,12),steel);hub.rotation.x=Math.PI/2;hub.position.copy(w.position);car.add(hub);}
+const {car,wheels}=createRoadster();scene.add(car);
 const flames=[];for(const z of [-1.1,1.1]){box(.6,.3,.35,steel,0,-.1,z,car);const f=new THREE.Mesh(new THREE.ConeGeometry(.22,1.6,8),new THREE.MeshBasicMaterial({color:'#7af1ff',transparent:true,opacity:.85}));f.rotation.z=Math.PI;f.position.set(0,-1,z);car.add(f);flames.push(f);}
 let g=fresh(),running=false,paused=false,shown=false,sound=false,audio;const input={};let best=0;try{best=Number(localStorage.getItem('flip-best')||0)}catch{}$('best').textContent=best;
 function tone(freq,dur=.09){if(!sound)return;audio??=new AudioContext();audio.resume();const o=audio.createOscillator(),v=audio.createGain();o.frequency.value=freq;v.gain.setValueAtTime(.045,audio.currentTime);v.gain.exponentialRampToValueAtTime(.001,audio.currentTime+dur);o.connect(v).connect(audio.destination);o.start();o.stop(audio.currentTime+dur);}
