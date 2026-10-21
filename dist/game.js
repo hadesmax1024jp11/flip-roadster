@@ -43,7 +43,7 @@ for(const z of [-.95,.95])for(const x of [-1.12,1.12]){
  const core=new THREE.Mesh(new THREE.ConeGeometry(.09,1,10),new THREE.MeshBasicMaterial({color:'#e7ffff',transparent:true,opacity:.95,depthWrite:false}));
  core.rotation.z=Math.PI;core.position.y=-.5;jet.add(core);car.add(jet);flames.push(jet);
 }
-let g=fresh(),running=false,paused=false,shown=false,sound=false;const sfx=new VehicleAudio();const input={};let best=0;try{best=Number(localStorage.getItem('flip-best')||0)}catch{}$('best').textContent=best;
+let g=fresh(),running=false,paused=false,shown=false,sound=true;const sfx=new VehicleAudio();sfx.enabled=true;const input={};let best=0;try{best=Number(localStorage.getItem('flip-best')||0)}catch{}$('best').textContent=best;
 function tone(freq,dur=.09){sfx.cue(freq,dur);}
 function clear(){Object.keys(input).forEach(k=>input[k]=false);document.querySelectorAll('[data-key]').forEach(b=>b.classList.remove('active'));}
 function start(){g=fresh();running=true;paused=false;shown=false;clear();$('pause').querySelector('img').src='assets/buttons/pause.svg';$('pause').setAttribute('aria-label','暫停遊戲');$('intro').classList.add('hidden');$('result').classList.add('hidden');$('paused').classList.add('hidden');sfx.startup();}
