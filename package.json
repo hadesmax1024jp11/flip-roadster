@@ -1,1 +1,11 @@
-{"name":"flip-roadster","private":true,"type":"module","scripts":{"start":"node server.mjs","test":"node --test tests.mjs"}}
+{
+  "name": "flip-roadster",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test tests.mjs"
+  },
+  "version": "1.0.0",
+  "description": "9:16 Three.js 飛行電動車：反曲牆、空中翻轉與噴射著陸"
+}
