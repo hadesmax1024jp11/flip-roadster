@@ -1,5 +1,17 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';import {fresh,step,grade} from './dist/physics.js';
 import {pose,END,hitsWall,worldHull,R,WALL} from './dist/physics.js';
+test('drive alone peels and falls without a false wall crash or penetration',()=>{
+ for(const dt of [1/60,1/120,1/240]){
+  const g=fresh();while(g.phase!=='done'&&g.time<15){step(g,{drive:true},dt);assert.equal(hitsWall(g),false);}
+  assert.equal(g.phase,'done');assert.match(g.reason,/吸附中斷/);assert.equal(g.y,.72);assert.ok(g.time>6);
+ }
+});
+test('releasing stick at different wall angles resolves support contact',()=>{
+ for(const angle of [1.7,2,2.4,2.8,3.1]){
+  const g=fresh();while(g.phase!=='done'&&g.time<15){step(g,{drive:true,stick:g.pitch<angle},1/120);assert.equal(hitsWall(g),false);}
+  assert.equal(g.phase,'done');assert.doesNotMatch(g.reason,/撞/);
+ }
+});
 test('all wheel and body samples stay inside the drivable curved surface',()=>{for(let s=44;s<=END;s+=.02){const g={...fresh(),...pose(s)};assert.equal(hitsWall(g),false,`intersection at ${s}`);for(const [x,y,z] of worldHull(g)){if(x>WALL&&y>0&&y<2*R)assert.ok(Math.hypot(x-WALL,y-R)<R,`surface clipping at ${s}`);}}});
 test('full drive, launch, roll and brake sequence can land safely',()=>{const g=fresh();while(g.phase==='track')step(g,{drive:true,stick:true},1/120);const launch=g.time;while(g.phase!=='done'){const elapsed=g.time-launch;const braking=Math.cos(g.pitch)*Math.cos(g.roll)>.8&&g.vy< -2;step(g,{left:elapsed<.7||braking,right:elapsed>=.7&&braking},1/120);}assert.equal(g.result.ok,true);assert.ok(g.result.score>60);});
 test('leaving the wall does not force a later safe landing to fail',()=>{const g={...fresh(),phase:'flight',x:-10,y:.73,vy:-1,reason:'吸附中斷'};step(g,{},.02);assert.equal(g.result.ok,true);});
