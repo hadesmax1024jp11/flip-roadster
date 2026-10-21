@@ -13,7 +13,7 @@ test('releasing stick at different wall angles resolves support contact',()=>{
  }
 });
 test('all wheel and body samples stay inside the drivable curved surface',()=>{for(let s=44;s<=END;s+=.02){const g={...fresh(),...pose(s)};assert.equal(hitsWall(g),false,`intersection at ${s}`);for(const [x,y,z] of worldHull(g)){if(x>WALL&&y>0&&y<2*R)assert.ok(Math.hypot(x-WALL,y-R)<R,`surface clipping at ${s}`);}}});
-test('full drive, launch, roll and brake sequence can land safely',()=>{const g=fresh();while(g.phase==='track')step(g,{drive:true,stick:true},1/120);const launch=g.time;while(g.phase!=='done'){const elapsed=g.time-launch;const braking=Math.cos(g.pitch)*Math.cos(g.roll)>.8&&g.vy< -2;step(g,{left:elapsed<.7||braking,right:elapsed>=.7&&braking},1/120);}assert.equal(g.result.ok,true);assert.ok(g.result.score>60);});
+test('full drive, launch, roll and brake sequence can land safely',()=>{const g=fresh();while(g.phase==='track')step(g,{drive:true,stick:true},1/120);const launch=g.time;while(g.phase!=='done'){const elapsed=g.time-launch;const braking=Math.cos(g.pitch)*Math.cos(g.roll)>.8&&g.vy< -2;step(g,{left:elapsed<.45||braking,right:elapsed>=.45&&braking},1/120);}assert.equal(g.result.ok,true);assert.ok(g.result.score>60);});
 test('leaving the wall does not force a later safe landing to fail',()=>{const g={...fresh(),phase:'flight',x:-10,y:.73,vy:-1,reason:'吸附中斷'};step(g,{},.02);assert.equal(g.result.ok,true);});
 test('wall collision respects finite road width',()=>{assert.equal(hitsWall({...fresh(),x:30,y:12,z:0}),true);assert.equal(hitsWall({...fresh(),x:30,y:12,z:8}),false);});
 test('drive and stick launch inverted',()=>{const g=fresh();for(let i=0;i<1800&&g.phase==='track';i++)step(g,{drive:true,stick:true},1/120);assert.equal(g.phase,'flight');assert.ok(Math.abs(g.pitch-Math.PI)<.01);assert.ok(g.vx<0);assert.ok(g.air<AIR_CAPACITY);});
@@ -26,7 +26,7 @@ test('paired jets reverse descent and climb while preserving forward glide acros
  for(const dt of [1/60,1/120,1/240]){
   const g={...fresh(),phase:'flight',x:-10,y:25,pitch:Math.PI,roll:Math.PI,vx:-20,vy:-3};
   for(let t=0;t<3;t+=dt)step(g,{left:true,right:true},dt);
-  assert.equal(g.phase,'flight');assert.ok(g.x< -69);assert.ok(g.vx< -23);
+  assert.equal(g.phase,'flight');assert.ok(g.x< -69);assert.ok(g.vx< -21.5);
   assert.ok(g.vy>22&&g.vy<24);assert.ok(g.y>54&&g.y<57);assert.ok(g.air>50);
  }
 });
@@ -39,17 +39,17 @@ test('upright glide falls gently and empty jets cannot hover',()=>{
  assert.ok(stationary.vy< -9);
 });
 
-test('double air capacity supports more than the former 6.25 seconds of paired thrust',()=>{
+test('halved air capacity provides 6.25 seconds of paired thrust',()=>{
  const g={...fresh(),phase:'flight',x:-10,y:30,pitch:Math.PI,roll:Math.PI,vx:-20};
- assert.equal(g.air,200);
- for(let i=0;i<960;i++)step(g,{left:true,right:true},1/120);
- assert.equal(g.phase,'flight');assert.ok(Math.abs(g.air-72)<.01);assert.ok(g.y>28);
+ assert.equal(g.air,100);
+ for(let i=0;i<480;i++)step(g,{left:true,right:true},1/120);
+ assert.equal(g.phase,'flight');assert.ok(Math.abs(g.air-36)<.01);assert.ok(g.y>28);
 });
 test('lane assist recovers lateral drift and auto-levels an upright car',()=>{
  for(const dt of [1/60,1/120,1/240])for(const side of [-1,1]){
   const g={...fresh(),phase:'flight',x:-10,y:100,pitch:Math.PI,roll:Math.PI+.4*side,z:3*side,vz:5*side,vx:-20};
   for(let t=0;t<4;t+=dt)step(g,{left:true,right:true},dt);
-  assert.ok(Math.abs(g.z)<.08);assert.ok(Math.abs(g.roll-Math.PI)<.01);assert.ok(g.vx< -24);
+  assert.ok(Math.abs(g.z)<.08);assert.ok(Math.abs(g.roll-Math.PI)<.01);assert.ok(g.vx< -22);
  }
 });
 
@@ -69,7 +69,7 @@ test('nose-down trim gives jet-powered forward thrust in both headings, without 
   const powered={...base},coasting={...base};
   for(let i=0;i<Math.round(2/dt);i++){step(powered,{left:true,right:true},dt);step(coasting,{},dt);}
   assert.ok(Math.sin(powered.pitch)<-.09,'nose points gently down');
-  assert.ok(direction*powered.vx>22);assert.equal(coasting.vx,20*direction);
+  assert.ok(direction*powered.vx>21);assert.equal(coasting.vx,20*direction);
   assert.ok(powered.vy>0);assert.ok(Math.abs(grade({...powered,vy:-1}).tilt-6)<.2);
  }
 });

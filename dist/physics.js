@@ -1,8 +1,8 @@
 export const R=12, START=-26, WALL=18, END=44+Math.PI*R;
 // Front/rear tyres have finite extent: centre-only clearance clips a curved road.
 export const CLEARANCE=.84;
-export const AIR_CAPACITY=200;
-export const MASS=1200, JET_THRUST=4200, ROLL_INERTIA=900;
+export const AIR_CAPACITY=100;
+export const MASS=1200, JET_THRUST=4200, ROLL_INERTIA=450;
 export function pose(s){if(s<44)return{x:START+s,y:.72+.12*Math.max(0,Math.min(1,(s-40)/4)),pitch:0};const t=(s-44)/R;return{x:WALL+(R-CLEARANCE)*Math.sin(t),y:R-(R-CLEARANCE)*Math.cos(t),pitch:t};}
 export const hull=[];
 for(const x of [-1.85,1.85])for(const y of [-.16,.4])for(const z of [-.9,.9])hull.push([x,y,z]);
@@ -56,7 +56,7 @@ if(g.phase==='flight'){
  // Each side fires two nozzles. F = m*a; equal sides cancel roll torque.
  const force=(Number(l)+Number(r))*2*JET_THRUST/MASS;
  // Rotate body-up into world space so tilted jets also accelerate horizontally.
- g.vx+=-Math.sin(g.pitch)*Math.cos(g.roll)*force*dt;
+ g.vx+=-Math.sin(g.pitch)*Math.cos(g.roll)*force*.5*dt;
  g.vy+=(upright*force-gravity)*dt;
  // Lane assistance remains an explicit stabilising force for easier control.
  g.vz+=(Math.sin(g.roll)*force-6*g.z-5*g.vz)*dt;
