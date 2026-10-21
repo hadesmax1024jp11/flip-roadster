@@ -1,4 +1,9 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';import {fresh,step,grade} from './dist/physics.js';
+import {pose,END,hitsWall,worldHull,R,WALL} from './dist/physics.js';
+test('all wheel and body samples stay inside the drivable curved surface',()=>{for(let s=44;s<=END;s+=.02){const g={...fresh(),...pose(s)};assert.equal(hitsWall(g),false,`intersection at ${s}`);for(const [x,y,z] of worldHull(g)){if(x>WALL&&y>0&&y<2*R)assert.ok(Math.hypot(x-WALL,y-R)<R,`surface clipping at ${s}`);}}});
+test('full drive, launch, roll and brake sequence can land safely',()=>{const g=fresh();while(g.phase==='track')step(g,{drive:true,stick:true},1/120);const launch=g.time;while(g.phase!=='done'){const elapsed=g.time-launch;const braking=Math.cos(g.pitch)*Math.cos(g.roll)>.8&&g.vy< -2;step(g,{left:elapsed<.7||braking,right:elapsed>=.7&&braking},1/120);}assert.equal(g.result.ok,true);assert.ok(g.result.score>60);});
+test('leaving the wall does not force a later safe landing to fail',()=>{const g={...fresh(),phase:'flight',x:-10,y:.73,vy:-1,reason:'吸附中斷'};step(g,{},.02);assert.equal(g.result.ok,true);});
+test('wall collision respects finite road width',()=>{assert.equal(hitsWall({...fresh(),x:30,y:12,z:0}),true);assert.equal(hitsWall({...fresh(),x:30,y:12,z:8}),false);});
 test('drive and stick launch inverted',()=>{const g=fresh();for(let i=0;i<1800&&g.phase==='track';i++)step(g,{drive:true,stick:true},1/120);assert.equal(g.phase,'flight');assert.ok(Math.abs(g.pitch-Math.PI)<.01);assert.ok(g.vx<0);assert.ok(g.air<100);});
 test('without stick overhang peels off',()=>{const g=fresh();for(let i=0;i<1800&&g.phase==='track';i++)step(g,{drive:true},1/120);assert.match(g.reason,/吸附/);});
 test('inverted thrust pushes down, upright thrust brakes',()=>{for(const roll of [0,Math.PI]){const g={...fresh(),phase:'flight',x:-10,y:20,pitch:Math.PI,roll};step(g,{left:true,right:true},.01);assert.equal(g.vy>0,roll===Math.PI);assert.equal(g.omega,0);}});
