@@ -23,27 +23,10 @@ const logoTexture=new THREE.TextureLoader().load('./assets/party-logo.png');
 logoTexture.colorSpace=THREE.SRGBColorSpace;
 logoTexture.anisotropy=renderer.capabilities.getMaxAnisotropy();
 const logoMaterial=new THREE.MeshBasicMaterial({map:logoTexture,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2});
-// Rotate the artwork 90 degrees and tile the full straight runway.
-const logoWidth=10.5,logoHeight=logoWidth*1041/3049;
-const logoPlane=new THREE.PlaneGeometry(logoWidth,logoHeight);
-for(let x=-383;x<=13;x+=12)for(const z of [-5,0,5]){
- const decal=new THREE.Mesh(logoPlane,logoMaterial);
- decal.rotation.x=-Math.PI/2;decal.position.set(x,.115,z);decal.renderOrder=2;scene.add(decal);
-}
-// Continue the same horizontal artwork up the curved wall, following its surface.
-for(let start=0.7;start+6.4<Math.PI*R;start+=7.4)for(const centerZ of [-2.1,2.1]){
- const positions=[],uvs=[],triangles=[],length=6.4,height=length*1041/3049;
- for(let i=0;i<=32;i++){
-  const u=i/32,t=(start+u*length)/R;
-  for(let edge=0;edge<2;edge++){
-   positions.push(WALL+(R-.035)*Math.sin(t),R-(R-.035)*Math.cos(t),centerZ+(edge-.5)*height);
-   uvs.push(u,1-edge);
-  }
-  if(i<32){const n=i*2;triangles.push(n,n+1,n+2,n+1,n+3,n+2);}
- }
- const mesh=new THREE.BufferGeometry();mesh.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));mesh.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));mesh.setIndex(triangles);
- const decal=new THREE.Mesh(mesh,logoMaterial);decal.renderOrder=2;scene.add(decal);
-}
+// One large horizontal logo, centred on the acceleration runway.
+const logoWidth=34,logoHeight=logoWidth*1041/3049;
+const decal=new THREE.Mesh(new THREE.PlaneGeometry(logoWidth,logoHeight),logoMaterial);
+decal.rotation.x=-Math.PI/2;decal.position.set(-5,.115,0);decal.renderOrder=2;scene.add(decal);
 
 function sign(text,x,y,z,size=1){const c=document.createElement('canvas');c.width=1024;c.height=256;const ctx=c.getContext('2d');ctx.fillStyle='#173037';ctx.fillRect(0,0,1024,256);ctx.fillStyle='#dafa8e';ctx.font='bold 95px sans-serif';ctx.textAlign='center';ctx.fillText(text,512,163);const m=new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c)});const s=new THREE.Mesh(new THREE.PlaneGeometry(12*size,3*size),m);s.position.set(x,y,z);scene.add(s);return s;}
 sign('FLIP / 001',29,12,-5.5,1.4);sign('LANDING ZONE',-28,1,-9,.9);
