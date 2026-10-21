@@ -21,6 +21,15 @@ export class VehicleAudio {
  startup(){
   if(!this.enabled)return;this.unlock();if(!this.ctx)return;const c=this.ctx,t=c.currentTime,o=c.createOscillator(),v=c.createGain();o.type='triangle';o.frequency.setValueAtTime(65,t);o.frequency.exponentialRampToValueAtTime(420,t+.55);o.frequency.exponentialRampToValueAtTime(150,t+.9);v.gain.setValueAtTime(.001,t);v.gain.linearRampToValueAtTime(.2,t+.1);v.gain.exponentialRampToValueAtTime(.001,t+.95);o.connect(v);v.connect(this.master);o.start();o.stop(t+1);o.onended=()=>{o.disconnect();v.disconnect();};
  }
+ landing(crash,perfect){
+  if(!this.enabled)return;this.unlock();if(!this.ctx)return;
+  const c=this.ctx,t=c.currentTime;
+  if(!crash){this.cue(perfect?1046:740,.4);return;}
+  // A short metallic impact followed by a low explosion and filtered noise tail.
+  this.cue(180,.12);
+  const o=c.createOscillator(),v=c.createGain();o.frequency.setValueAtTime(110,t);o.frequency.exponentialRampToValueAtTime(28,t+.7);v.gain.setValueAtTime(.65,t);v.gain.exponentialRampToValueAtTime(.001,t+1);o.connect(v);v.connect(this.master);o.start();o.stop(t+1.05);o.onended=()=>{o.disconnect();v.disconnect();};
+  const n=c.createBufferSource(),filter=c.createBiquadFilter(),gain=c.createGain();n.buffer=this.noise;filter.type='lowpass';filter.frequency.setValueAtTime(4500,t);filter.frequency.exponentialRampToValueAtTime(180,t+1.2);gain.gain.setValueAtTime(.001,t);gain.gain.linearRampToValueAtTime(.7,t+.03);gain.gain.exponentialRampToValueAtTime(.001,t+1.3);n.connect(filter);filter.connect(gain);gain.connect(this.master);n.start();n.stop(t+1.4);n.onended=()=>{n.disconnect();filter.disconnect();gain.disconnect();};
+ }
  update(g,input,active,paused){
   if(!this.ctx)return;const t=this.ctx.currentTime;
   this.master.gain.setTargetAtTime(this.enabled&&!paused?.5:0,t,.015);

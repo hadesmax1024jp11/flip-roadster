@@ -60,3 +60,5 @@ test('paired thrust adds lift, tilt changes direction, release restores gravity'
  const tilt={...make(),pitch:Math.PI/4};step(tilt,{left:true,right:true},.01);assert.ok(tilt.vx<0);
  const before=both.vy;step(both,{},.01);assert.ok(both.vy<before);
 });
+
+test('perfect landing earns 50 bonus; tilted hard or spinning contacts do not',()=>{const base={...fresh(),vy:-2};const perfect=grade(base);assert.equal(perfect.bonus,50);assert.equal(perfect.perfect,true);for(const change of [{roll:.2},{vy:-4},{omega:1},{roll:Math.PI}]){const r=grade({...base,...change});assert.equal(r.bonus,0);assert.equal(r.perfect,false);}assert.equal(perfect.score,94);});
