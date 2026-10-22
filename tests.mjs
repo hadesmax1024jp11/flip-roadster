@@ -1,9 +1,9 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';import {fresh,step,grade,AIR_CAPACITY} from './dist/physics.js';
-import {pose,END,hitsWall,worldHull,R,WALL} from './dist/physics.js';
+import {pose,END,hitsWall,worldHull,R,WALL,groundClearance,groundHeight} from './dist/physics.js';
 test('drive alone peels and falls without a false wall crash or penetration',()=>{
  for(const dt of [1/60,1/120,1/240]){
   const g=fresh();while(g.phase!=='done'&&g.time<15){step(g,{drive:true},dt);assert.equal(hitsWall(g),false);}
-  assert.equal(g.phase,'done');assert.match(g.reason,/吸附中斷/);assert.equal(g.y,.72);assert.ok(g.time>6);
+  assert.equal(g.phase,'done');assert.match(g.reason,/吸附中斷/);assert.ok(Math.abs(groundClearance(g))<1e-8);assert.ok(g.time>6);
  }
 });
 test('releasing stick at different wall angles resolves support contact',()=>{
@@ -71,5 +71,22 @@ test('nose-down trim gives jet-powered forward thrust in both headings, without 
   assert.ok(Math.sin(powered.pitch)<-.09,'nose points gently down');
   assert.ok(direction*powered.vx>21);assert.equal(coasting.vx,20*direction);
   assert.ok(powered.vy>0);assert.ok(Math.abs(grade({...powered,vy:-1}).tilt-6)<.2);
+ }
+});
+
+test('ground contact supports upright inverted sideways and nose-down cars at every timestep',()=>{
+ for(const dt of [1/60,1/120,1/240])for(const [pitch,roll] of [[0,0],[Math.PI,0],[0,Math.PI/2],[Math.PI/2,0],[Math.PI+.105,Math.PI]]){
+  const g={...fresh(),phase:'flight',x:-30,y:6,pitch,roll,vy:-30};
+  while(g.phase!=='done')step(g,{},dt);
+  assert.equal(g.impactKind,'ground');assert.ok(Math.abs(groundClearance(g))<1e-8);
+  const y=g.y;step(g,{},dt);assert.equal(g.y,y);
+ }
+});
+test('rendered car vertices remain above ground after contact',async()=>{
+ const {createRoadster}=await import('./dist/roadster.js');const {car}=createRoadster();
+ for(const [pitch,roll] of [[0,0],[Math.PI,0],[0,Math.PI/2],[Math.PI/2,0],[.2,.4],[Math.PI+.105,Math.PI]]){
+  const g={...fresh(),phase:'flight',x:-30,y:5,pitch,roll,vy:-40};while(g.phase!=='done')step(g,{},1/120);
+  car.rotation.set(0,0,g.pitch);car.rotateX(g.roll);car.position.set(g.x,g.y,g.z);car.updateMatrixWorld(true);
+  car.traverse(m=>{if(!m.isMesh)return;const pos=m.geometry.attributes.position;for(let i=0;i<pos.count;i++){const v=car.position.clone().fromBufferAttribute(pos,i).applyMatrix4(m.matrixWorld);assert.ok(v.y>=groundHeight(v.x,v.z)-.001,'rendered car penetrated ground');}});
  }
 });
