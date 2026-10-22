@@ -1,8 +1,8 @@
 import {VehicleAudio} from './audio.js?v=14';
-import {LandingEffects} from './landing-effects.js?v=19';
+import {LandingEffects} from './landing-effects.js?v=23';
 import * as THREE from './vendor/three.module.js';
 import {createRoadster} from './roadster.js?v=5';
-import {fresh,step,R,WALL,pose,END,AIR_CAPACITY,REST_HEIGHT} from './physics.js?v=21';
+import {fresh,step,R,WALL,pose,END,AIR_CAPACITY,REST_HEIGHT} from './physics.js?v=22';
 const $=id=>document.getElementById(id),host=$('scene');let renderer;
 try{renderer=new THREE.WebGLRenderer({antialias:true});}catch(e){$('hint').textContent='此裝置無法啟動 WebGL，請使用支援 WebGL 的瀏覽器。';$('start').disabled=true;throw e;}
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;host.appendChild(renderer.domElement);

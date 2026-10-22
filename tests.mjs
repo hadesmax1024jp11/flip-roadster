@@ -27,7 +27,7 @@ test('paired jets reverse descent and climb while preserving forward glide acros
   const g={...fresh(),phase:'flight',x:-10,y:25,pitch:Math.PI,roll:Math.PI,vx:-20,vy:-3};
   for(let t=0;t<3;t+=dt)step(g,{left:true,right:true},dt);
   assert.equal(g.phase,'flight');assert.ok(g.x< -69);assert.ok(g.vx< -21.5);
-  assert.ok(g.vy>15&&g.vy<16);assert.ok(g.y>43&&g.y<46);assert.ok(g.air>50);
+  assert.ok(g.vy>19&&g.vy<21);assert.ok(g.y>49&&g.y<52);assert.ok(g.air>50);
  }
 });
 test('upright glide falls gently and empty jets cannot hover',()=>{

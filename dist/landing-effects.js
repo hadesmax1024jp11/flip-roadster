@@ -6,7 +6,7 @@ function plumeTexture(smoke=false){
  ctx.fillStyle=g;ctx.fillRect(0,0,128,128);return new THREE.CanvasTexture(c);
 }
 export class LandingEffects {
- constructor(scene){this.group=new THREE.Group();scene.add(this.group);this.age=99;this.parts=[];this.fireTexture=plumeTexture();this.smokeTexture=plumeTexture(true);}
+ constructor(scene){this.group=new THREE.Group();this.group.renderOrder=100;scene.add(this.group);this.age=99;this.parts=[];this.fireTexture=plumeTexture();this.smokeTexture=plumeTexture(true);}
  reset(){for(const p of this.parts){if(p.mesh.isMesh)p.mesh.geometry.dispose();p.mesh.material.dispose();}this.parts=[];this.group.clear();this.age=99;this.crash=false;}
  trigger(g,crash,perfect){this.reset();this.age=0;this.crash=crash;this.group.position.set(g.x,g.y,g.z);
   for(let i=0;i<(crash?85:24);i++){
@@ -22,6 +22,9 @@ export class LandingEffects {
    const ball=new THREE.Mesh(new THREE.SphereGeometry(1,16,12),new THREE.MeshBasicMaterial({color:0xffd351,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));this.group.add(ball);this.parts.push({mesh:ball,kind:'ball'});
    const ring=new THREE.Mesh(new THREE.RingGeometry(.8,1,48),new THREE.MeshBasicMaterial({color:0xffc05a,transparent:true,depthWrite:false,side:THREE.DoubleSide}));ring.rotation.x=-Math.PI/2;ring.position.y=-.55;this.group.add(ring);this.parts.push({mesh:ring,kind:'ring'});
   }
+  // Draw the whole impact layer after runway decals; flames remain above smoke.
+  const order={ring:100,smoke:101,flame:102,spark:103,ball:104};
+  for(const p of this.parts){p.mesh.renderOrder=order[p.kind];p.mesh.material.depthTest=false;}
   this.light=new THREE.PointLight(crash?0xff681c:0xffee99,crash?110:12,30);this.group.add(this.light);
  }
  update(dt){this.age+=dt;const t=this.age;if(t>(this.crash?7:3)){if(this.parts.length)this.reset();return;}

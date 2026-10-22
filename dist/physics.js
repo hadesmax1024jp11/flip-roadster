@@ -4,7 +4,7 @@ export const CLEARANCE=.84;
 export const REST_HEIGHT=.82;
 export const AIR_CAPACITY=100;
 export const GRAVITY=12.26; // 25% stronger than the original 9.81.
-export const MASS=1200, JET_THRUST=4200, ROLL_INERTIA=450;
+export const MASS=1200, JET_THRUST=4620, ROLL_INERTIA=450;
 export function pose(s){if(s<44)return{x:START+s,y:REST_HEIGHT+.02*Math.max(0,Math.min(1,(s-40)/4)),pitch:0};const t=(s-44)/R;return{x:WALL+(R-CLEARANCE)*Math.sin(t),y:R-(R-CLEARANCE)*Math.cos(t),pitch:t};}
 export const hull=[];
 for(const x of [-1.85,1.85])for(const y of [-.16,.4])for(const z of [-.9,.9])hull.push([x,y,z]);
