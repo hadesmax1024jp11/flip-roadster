@@ -7,6 +7,15 @@ export const GRAVITY=12.26; // 25% stronger than the original 9.81.
 // V2.8.0: 50% faster single-side roll response; lift and air consumption unchanged.
 export const ROLL_POWER=1.5;
 export const MASS=1200, JET_THRUST=4620, ROLL_INERTIA=450;
+// Stylised ground cushion: fades in below 4 m and only for downward-facing jets.
+export function groundEffect(g){
+ if(g.phase!=='flight')return 0;
+ const upright=Math.cos(g.pitch)*Math.cos(g.roll);
+ const alignment=Math.max(0,Math.min(1,(upright-.5)/.5));
+ const height=Math.max(0,g.y-groundHeight(g.x,g.z)-.7);
+ const proximity=Math.max(0,Math.min(1,1-height/4));
+ return proximity*proximity*(3-2*proximity)*alignment;
+}
 export function pose(s){if(s<44)return{x:START+s,y:REST_HEIGHT+.02*Math.max(0,Math.min(1,(s-40)/4)),pitch:0};const t=(s-44)/R;return{x:WALL+(R-CLEARANCE)*Math.sin(t),y:R-(R-CLEARANCE)*Math.cos(t),pitch:t};}
 export const hull=[];
 for(const x of [-1.85,1.85])for(const y of [-.16,.4])for(const z of [-.9,.9])hull.push([x,y,z]);
@@ -72,7 +81,7 @@ if(g.phase==='flight'){
  const force=(Number(l)+Number(r))*2*JET_THRUST/MASS;
  // Rotate body-up into world space so tilted jets also accelerate horizontally.
  g.vx+=-Math.sin(g.pitch)*Math.cos(g.roll)*force*.5*dt;
- g.vy+=(upright*force-gravity)*dt;
+ g.vy+=(upright*force*(1+1.2*groundEffect(g))-gravity)*dt;
  // Lane assistance remains an explicit stabilising force for easier control.
  g.vz+=(Math.sin(g.roll)*force-6*g.z-5*g.vz)*dt;
  g.x+=g.vx*dt;g.y+=g.vy*dt;g.z+=g.vz*dt;

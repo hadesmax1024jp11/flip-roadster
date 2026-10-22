@@ -1,4 +1,4 @@
-import {test} from 'node:test';import assert from 'node:assert/strict';import {fresh,step,grade,AIR_CAPACITY} from './dist/physics.js';
+import {test} from 'node:test';import assert from 'node:assert/strict';import {fresh,step,grade,AIR_CAPACITY,groundEffect} from './dist/physics.js';
 import {pose,END,hitsWall,worldHull,R,WALL,groundClearance,groundHeight} from './dist/physics.js';
 test('drive alone peels and falls without a false wall crash or penetration',()=>{
  for(const dt of [1/60,1/120,1/240]){
@@ -124,5 +124,21 @@ test('V2.8.0 single-side roll speed is 50 percent faster in both directions',()=
    step(g,{[side]:true},dt);
   }
   assert.ok(Math.abs(g.omega/previousOmega-1.5)<1e-10);
+ }
+});
+
+test('ground cushion increases smoothly near ground and rejects inverted or sideways jets',()=>{
+ const g={...fresh(),phase:'flight',x:-30};
+ assert.equal(groundEffect({...g,y:6}),0);
+ assert.ok(groundEffect({...g,y:1})>groundEffect({...g,y:3}));
+ assert.equal(groundEffect({...g,y:1,roll:Math.PI}),0);
+ assert.equal(groundEffect({...g,y:1,roll:Math.PI/2}),0);
+});
+test('paired jets rescue a low descending car but no jets or empty air still crash',()=>{
+ for(const dt of [1/60,1/120,1/240]){
+  const base={...fresh(),phase:'flight',x:-30,y:2,vy:-5};
+  const saved={...base};for(let i=0;i<.6/dt&&saved.phase!=='done';i++)step(saved,{left:true,right:true},dt);
+  assert.equal(saved.phase,'flight');assert.ok(saved.vy>0);assert.ok(saved.y>2);
+  for(const empty of [false,true]){const crash={...base,air:empty?0:100};for(let i=0;i<.6/dt&&crash.phase!=='done';i++)step(crash,{left:empty,right:empty},dt);assert.equal(crash.phase,'done');}
  }
 });
