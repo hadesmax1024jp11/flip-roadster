@@ -27,16 +27,16 @@ test('paired jets reverse descent and climb while preserving forward glide acros
   const g={...fresh(),phase:'flight',x:-10,y:25,pitch:Math.PI,roll:Math.PI,vx:-20,vy:-3};
   for(let t=0;t<3;t+=dt)step(g,{left:true,right:true},dt);
   assert.equal(g.phase,'flight');assert.ok(g.x< -69);assert.ok(g.vx< -21.5);
-  assert.ok(g.vy>22&&g.vy<24);assert.ok(g.y>54&&g.y<57);assert.ok(g.air>50);
+  assert.ok(g.vy>15&&g.vy<16);assert.ok(g.y>43&&g.y<46);assert.ok(g.air>50);
  }
 });
 test('upright glide falls gently and empty jets cannot hover',()=>{
  const g={...fresh(),phase:'flight',x:-10,y:100,pitch:Math.PI,roll:Math.PI,vx:-20,air:0};
  for(let i=0;i<120;i++)step(g,{left:true,right:true},1/120);
- assert.equal(g.vx,-20);assert.ok(g.vy< -5&&g.vy> -6);assert.ok(g.y<98);
+ assert.equal(g.vx,-20);assert.ok(g.vy< -7.7&&g.vy> -8);assert.ok(g.y<98);
  const stationary={...fresh(),phase:'flight',x:-10,y:100,air:0};
  for(let i=0;i<120;i++)step(stationary,{},1/120);
- assert.ok(stationary.vy< -9);
+ assert.ok(stationary.vy< -12&&stationary.vy> -12.5);
 });
 
 test('halved air capacity provides 6.25 seconds of paired thrust',()=>{

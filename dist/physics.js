@@ -3,6 +3,7 @@ export const R=12, START=-26, WALL=18, END=44+Math.PI*R;
 export const CLEARANCE=.84;
 export const REST_HEIGHT=.82;
 export const AIR_CAPACITY=100;
+export const GRAVITY=12.26; // 25% stronger than the original 9.81.
 export const MASS=1200, JET_THRUST=4200, ROLL_INERTIA=450;
 export function pose(s){if(s<44)return{x:START+s,y:REST_HEIGHT+.02*Math.max(0,Math.min(1,(s-40)/4)),pitch:0};const t=(s-44)/R;return{x:WALL+(R-CLEARANCE)*Math.sin(t),y:R-(R-CLEARANCE)*Math.cos(t),pitch:t};}
 export const hull=[];
@@ -63,7 +64,7 @@ if(g.phase==='flight'){
  const upright=Math.cos(g.pitch)*Math.cos(g.roll);
  // Conserve forward momentum; aerodynamic lift supports a moving upright car.
  const glide=Math.max(0,upright)*Math.min(1,Math.abs(g.vx)/10);
- const gravity=9.81-4.5*glide;
+ const gravity=GRAVITY-4.5*glide;
  // Each side fires two nozzles. F = m*a; equal sides cancel roll torque.
  const force=(Number(l)+Number(r))*2*JET_THRUST/MASS;
  // Rotate body-up into world space so tilted jets also accelerate horizontally.
