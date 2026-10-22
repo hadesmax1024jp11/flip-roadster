@@ -90,3 +90,17 @@ test('rendered car vertices remain above ground after contact',async()=>{
   car.traverse(m=>{if(!m.isMesh)return;const pos=m.geometry.attributes.position;for(let i=0;i<pos.count;i++){const v=car.position.clone().fromBufferAttribute(pos,i).applyMatrix4(m.matrixWorld);assert.ok(v.y>=groundHeight(v.x,v.z)-.001,'rendered car penetrated ground');}});
  }
 });
+
+test('flight distance adds two points per metre and crash retains only distance points',()=>{
+ const short=grade({...fresh(),vy:-2,flightDistance:10}),far=grade({...fresh(),vy:-2,flightDistance:50});
+ assert.equal(far.score-short.score,80);assert.equal(far.distancePoints,100);
+ const crash=grade({...fresh(),roll:Math.PI,flightDistance:50});assert.equal(crash.score,100);assert.equal(crash.ok,false);
+});
+test('distance excludes runway driving vertical hovering and return travel',()=>{
+ const track=fresh();for(let i=0;i<100;i++)step(track,{drive:true},1/120);assert.equal(track.flightDistance,0);
+ const g={...fresh(),phase:'flight',x:-30,y:100,vx:10};for(let i=0;i<120;i++)step(g,{},1/120);
+ assert.ok(Math.abs(g.flightDistance-10)<1e-6);g.vx=-10;for(let i=0;i<120;i++)step(g,{},1/120);assert.ok(Math.abs(g.flightDistance-10)<1e-6);
+ const hover={...fresh(),phase:'flight',x:-30,y:100,vy:5};for(let i=0;i<120;i++)step(hover,{},1/120);assert.equal(hover.flightDistance,0);
+ const crash={...fresh(),phase:'flight',x:-30,y:2,roll:Math.PI,vy:-20,vx:10};while(crash.phase!=='done')step(crash,{},1/120);assert.equal(crash.result.score,crash.result.distancePoints);assert.ok(crash.result.distance>0);
+ assert.equal(fresh().flightDistance,0);
+});
