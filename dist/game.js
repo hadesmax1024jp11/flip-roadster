@@ -1,3 +1,4 @@
+import {GroundWash} from './ground-wash.js?v=2.8.2';
 import {VehicleAudio} from './audio.js?v=14';
 import {LandingEffects} from './landing-effects.js?v=23';
 import * as THREE from './vendor/three.module.js';
@@ -46,18 +47,15 @@ for(const z of [-.95,.95])for(const x of [-1.12,1.12]){
  const halo=new THREE.Mesh(new THREE.ConeGeometry(.5,3.2,16),new THREE.MeshBasicMaterial({color:'#19aaff',transparent:true,opacity:.22,depthWrite:false,blending:THREE.AdditiveBlending}));halo.rotation.z=Math.PI;halo.position.y=-1.6;jet.add(halo);
  for(let i=0;i<3;i++){const ring=new THREE.Mesh(new THREE.TorusGeometry(.18-i*.035,.035,6,16),new THREE.MeshBasicMaterial({color:'#bdffff',transparent:true,opacity:.8,depthWrite:false}));ring.rotation.x=Math.PI/2;ring.position.y=-.65-i*.65;jet.add(ring);}car.add(jet);flames.push(jet);
 }
-const jetGroundRings=flames.map(()=>{
- const ring=new THREE.Mesh(new THREE.RingGeometry(.55,1,40),new THREE.MeshBasicMaterial({color:'#b3edff',transparent:true,opacity:0,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending}));
- ring.rotation.x=-Math.PI/2;ring.renderOrder=4;scene.add(ring);return ring;
-});
-const nozzlePosition=new THREE.Vector3();
+const groundWash=new GroundWash(scene);
+const nozzlePosition=new THREE.Vector3(),jetDirection=new THREE.Vector3();
 const landingFX=new LandingEffects(scene);let reportDelay=-1;
 let g=fresh(),running=false,paused=false,shown=false,sound=true;const sfx=new VehicleAudio();sfx.enabled=true;const input={};let best=0;try{best=Number(localStorage.getItem('flip-best')||0)}catch{}$('best').textContent=best;
 function tone(freq,dur=.09){sfx.cue(freq,dur);}
 function clear(){Object.keys(input).forEach(k=>input[k]=false);document.querySelectorAll('[data-key]').forEach(b=>b.classList.remove('active'));}
-function start(){landingFX.reset();reportDelay=-1;car.visible=true;g=fresh();running=true;paused=false;shown=false;clear();$('pause').querySelector('img').src='assets/buttons/pause.svg';$('pause').setAttribute('aria-label','暫停遊戲');$('intro').classList.add('hidden');$('result').classList.add('hidden');$('paused').classList.add('hidden');sfx.startup();}
+function start(){groundWash.reset();landingFX.reset();reportDelay=-1;car.visible=true;g=fresh();running=true;paused=false;shown=false;clear();$('pause').querySelector('img').src='assets/buttons/pause.svg';$('pause').setAttribute('aria-label','暫停遊戲');$('intro').classList.add('hidden');$('result').classList.add('hidden');$('paused').classList.add('hidden');sfx.startup();}
 function togglePause(){if(!running||g.phase==='done')return;paused=!paused;clear();$('paused').classList.toggle('hidden',!paused);$('pause').querySelector('img').src='assets/buttons/'+(paused?'resume':'pause')+'.svg';$('pause').setAttribute('aria-label',paused?'繼續遊戲':'暫停遊戲');}
-$('start').onclick=start;$('again').onclick=start;$('restart').onclick=start;$('pause').onclick=togglePause;$('paused').onclick=togglePause;$('help').onclick=()=>{clear();reportDelay=-1;landingFX.reset();running=false;$('intro').classList.remove('hidden');$('result').classList.add('hidden');};$('sound').onclick=()=>{sound=!sound;sfx.enable(sound);$('sound').querySelector('img').src='assets/buttons/sound-'+(sound?'on':'off')+'.svg';$('sound').setAttribute('aria-label',sound?'關閉音效':'開啟音效');tone(600);};
+$('start').onclick=start;$('again').onclick=start;$('restart').onclick=start;$('pause').onclick=togglePause;$('paused').onclick=togglePause;$('help').onclick=()=>{clear();reportDelay=-1;landingFX.reset();groundWash.reset();running=false;$('intro').classList.remove('hidden');$('result').classList.add('hidden');};$('sound').onclick=()=>{sound=!sound;sfx.enable(sound);$('sound').querySelector('img').src='assets/buttons/sound-'+(sound?'on':'off')+'.svg';$('sound').setAttribute('aria-label',sound?'關閉音效':'開啟音效');tone(600);};
 const keys={Space:'drive',KeyX:'stick',ArrowLeft:'left',ArrowRight:'right'};
 function set(k,v){if(v)sfx.unlock();input[k]=v;document.querySelector(`[data-key="${k}"]`).classList.toggle('active',v);}
 addEventListener('keydown',e=>{if(keys[e.code]){e.preventDefault();if(e.code==='Space'&&!e.repeat&&(!running||g.phase==='done'))start();set(keys[e.code],true);}if(e.code==='KeyR'&&!e.repeat)start();if(e.code==='KeyP'&&!e.repeat)togglePause();});addEventListener('keyup',e=>{if(keys[e.code]){e.preventDefault();set(keys[e.code],false);}});addEventListener('blur',()=>{clear();if(running&&!paused)togglePause();});document.addEventListener('visibilitychange',()=>{if(document.hidden){clear();if(running&&!paused)togglePause();}});
@@ -102,11 +100,10 @@ function frame(now){requestAnimationFrame(frame);const dt=Math.min((now-last)/10
  f.getWorldPosition(nozzlePosition);
  const floor=groundHeight(nozzlePosition.x,nozzlePosition.z),upright=Math.cos(g.pitch)*Math.cos(g.roll);
  if(cushion>0)f.scale.y=Math.min(pulse,Math.max(.06,(nozzlePosition.y-floor)/(3.2*Math.max(.5,upright))));
- const ring=jetGroundRings[i];ring.visible=f.visible&&cushion>0;
- ring.position.set(nozzlePosition.x,floor+.035,nozzlePosition.z);
- const spread=(.8+cushion*1.3)*(1+((now*.002+i*.23)%1)*.45);
- ring.scale.setScalar(spread);ring.material.opacity=cushion*.55;
+ jetDirection.set(0,-1,0).applyQuaternion(car.quaternion);
+ if(!paused)groundWash.emit(i,nozzlePosition,jetDirection,f.visible?cushion:0,dt,{x:g.vx,z:g.vz});
 });
+if(!paused)groundWash.update(dt);
 const overview=!running;target.set(overview?12:g.x+4,overview?10:Math.max(7,g.y*.75),g.z*.7);const desired=target.clone().add(new THREE.Vector3(-22,17,39));camera.position.lerp(desired,1-Math.exp(-dt*3));camera.lookAt(target);if(landingFX.crash&&landingFX.age<.65){const shake=(1-landingFX.age/.65)*.35;camera.position.x+=Math.sin(now*.12)*shake;camera.position.y+=Math.cos(now*.15)*shake;}renderer.render(scene,camera);
 $('speed').textContent=Math.round((g.phase==='track'?g.v:Math.hypot(g.vx,g.vy))*3.6);const airPercent=g.air/AIR_CAPACITY*100;$('air').textContent=Math.ceil(airPercent)+'%';$('airbar').style.width=airPercent+'%';$('airbar').style.background=airPercent<20?'#ff9c72':'#ddff89';$('height').textContent=Math.max(0,g.y-REST_HEIGHT).toFixed(1);$('rolls').textContent=(g.travel/(2*Math.PI)).toFixed(1);
 const flight=g.phase==='flight';$('stage').textContent=paused?'PAUSED':flight?'03 — CONTROL YOUR LANDING':g.pitch>.1?'02 — CLIMB & STICK':'01 — ACCELERATE';$('hint').textContent=g.phase==='done'?(g.result.ok?(g.result.perfect?'完美著陸！額外 +50 分。':'安全著陸！'):(g.impactKind?'車輛撞擊！下次先翻正、減速再落地。':g.reason)):g.air<=0?'壓縮空氣耗盡！':flight?(g.reason.startsWith('吸附中斷')?'吸附已中斷！下次爬牆請同時按住 X 與空白鍵。':Math.cos(g.pitch)*Math.cos(g.roll)>.85?'微前傾滑翔！雙噴射向前推升，短按控制高度。':'短按單側噴射，翻正車身。'):g.pitch>.1?'按住 X 吸附，繼續前進至頂端。':'按住空白鍵前進，準備爬上反曲牆。';}
