@@ -1,5 +1,5 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';import {fresh,step,grade,AIR_CAPACITY,groundEffect} from './dist/physics.js';
-import {pose,END,hitsWall,worldHull,R,WALL,groundClearance,groundHeight} from './dist/physics.js';
+import {START,pose,END,hitsWall,worldHull,R,WALL,groundClearance,groundHeight} from './dist/physics.js';
 test('drive alone peels and falls without a false wall crash or penetration',()=>{
  for(const dt of [1/60,1/120,1/240]){
   const g=fresh();while(g.phase!=='done'&&g.time<15){step(g,{drive:true},dt);assert.equal(hitsWall(g),false);}
@@ -98,9 +98,9 @@ test('flight distance adds two points per metre and crash retains only distance 
 });
 test('distance excludes runway driving vertical hovering and return travel',()=>{
  const track=fresh();for(let i=0;i<100;i++)step(track,{drive:true},1/120);assert.equal(track.flightDistance,0);
- const g={...fresh(),phase:'flight',x:-30,y:100,vx:10};for(let i=0;i<120;i++)step(g,{},1/120);
- assert.ok(Math.abs(g.flightDistance-10)<1e-6);g.vx=-10;for(let i=0;i<120;i++)step(g,{},1/120);assert.ok(Math.abs(g.flightDistance-10)<1e-6);
- const hover={...fresh(),phase:'flight',x:-30,y:100,vy:5};for(let i=0;i<120;i++)step(hover,{},1/120);assert.equal(hover.flightDistance,0);
+ const g={...fresh(),phase:'flight',x:START,y:100,vx:-10};for(let i=0;i<120;i++)step(g,{},1/120);
+ assert.ok(Math.abs(g.flightDistance-10)<1e-6);g.vx=10;for(let i=0;i<120;i++)step(g,{},1/120);assert.ok(Math.abs(g.flightDistance-10)<1e-6);
+ const hover={...fresh(),phase:'flight',x:START,y:100,vy:5};for(let i=0;i<120;i++)step(hover,{},1/120);assert.equal(hover.flightDistance,0);
  const crash={...fresh(),phase:'flight',x:-30,y:2,roll:Math.PI,vy:-20,vx:10};while(crash.phase!=='done')step(crash,{},1/120);assert.equal(crash.result.score,crash.result.distancePoints);assert.ok(crash.result.distance>0);
  assert.equal(fresh().flightDistance,0);
 });
@@ -147,4 +147,15 @@ test('rotation contributes 100 points per turn independently from landing and di
  const base={...fresh(),vy:-2,flightDistance:20};const baseline=grade(base);
  for(const turns of [.25,.5,1,2,3]){const r=grade({...base,travel:turns*Math.PI*2});assert.equal(r.rotation,turns*100);assert.equal(r.score-baseline.score,turns*100);assert.equal(r.score,r.distancePoints+r.rotation+r.soft+r.level+r.bonus);}
  const crash=grade({...base,roll:Math.PI,travel:6*Math.PI});assert.equal(crash.ok,false);assert.equal(crash.score,40);
+});
+
+test('flight distance stays zero until crossing start and ignores lateral displacement',()=>{
+ for(const dt of [1/60,1/120,1/240]){
+  const g={...fresh(),phase:'flight',x:START+1,y:100,vx:-10,z:2};
+  for(let i=0;i<Math.round(.05/dt);i++)step(g,{},dt);assert.equal(g.flightDistance,0);
+  while(g.x>START-.5)step(g,{},dt);assert.ok(Math.abs(g.flightDistance-(START-g.x))<1e-9);
+  assert.equal(grade(g).distancePoints,Math.floor((START-g.x)*2));
+ }
+ const short={...fresh(),phase:'flight',x:START+3,y:2,roll:Math.PI,vy:-20};
+ while(short.phase!=='done')step(short,{},1/120);assert.equal(short.result.distance,0);assert.equal(short.result.distancePoints,0);
 });
