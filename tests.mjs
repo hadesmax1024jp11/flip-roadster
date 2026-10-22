@@ -115,3 +115,14 @@ test('perfect landing accepts tilts below 30 degrees without the old 24 degree g
   const result=grade({...base,...change});assert.equal(result.perfect,false);assert.equal(result.bonus,0);assert.equal(result.ok,false);
  }
 });
+
+test('V2.8.0 single-side roll speed is 50 percent faster in both directions',()=>{
+ for(const side of ['left','right'])for(const dt of [1/60,1/120,1/240]){
+  const g={...fresh(),phase:'flight',x:-30,y:100};let previousOmega=0;
+  for(let i=0;i<Math.round(.3/dt);i++){
+   previousOmega+=((side==='left'?1:-1)*2*4620*.95/450-previousOmega*1.8)*dt;
+   step(g,{[side]:true},dt);
+  }
+  assert.ok(Math.abs(g.omega/previousOmega-1.5)<1e-10);
+ }
+});

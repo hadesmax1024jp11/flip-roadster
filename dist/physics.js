@@ -4,6 +4,8 @@ export const CLEARANCE=.84;
 export const REST_HEIGHT=.82;
 export const AIR_CAPACITY=100;
 export const GRAVITY=12.26; // 25% stronger than the original 9.81.
+// V2.8.0: 50% faster single-side roll response; lift and air consumption unchanged.
+export const ROLL_POWER=1.5;
 export const MASS=1200, JET_THRUST=4620, ROLL_INERTIA=450;
 export function pose(s){if(s<44)return{x:START+s,y:REST_HEIGHT+.02*Math.max(0,Math.min(1,(s-40)/4)),pitch:0};const t=(s-44)/R;return{x:WALL+(R-CLEARANCE)*Math.sin(t),y:R-(R-CLEARANCE)*Math.cos(t),pitch:t};}
 export const hull=[];
@@ -52,7 +54,7 @@ if(g.phase==='flight'){
  const leveling=l===r&&Math.cos(g.pitch)*Math.cos(g.roll)>0;
  const targetRoll=Math.cos(g.pitch)<0?Math.PI:0;
  const rollError=Math.atan2(Math.sin(targetRoll-g.roll),Math.cos(targetRoll-g.roll));
- g.omega+=((Number(l)-Number(r))*2*JET_THRUST*.95/ROLL_INERTIA+(leveling?8*rollError:0)-g.omega*(leveling?4.5:1.8))*dt;
+ g.omega+=((Number(l)-Number(r))*2*JET_THRUST*.95*ROLL_POWER/ROLL_INERTIA+(leveling?8*rollError:0)-g.omega*(leveling?4.5:1.8))*dt;
  g.roll+=g.omega*dt;g.travel+=Math.abs(g.omega*dt);
  // Flight trim: smoothly lower the nose by six degrees once clear and upright.
  // This rotates the existing jet force forward, rather than adding free thrust.
