@@ -40,3 +40,19 @@ article>button.image-button{height:48px;width:100%}
 @media(prefers-reduced-motion:reduce){#more-games{animation:none}#more-games::after{animation:none;display:none}}
 
 #breakdown{white-space:pre-line}
+
+/* Compact, aligned scorecard; the three awarded rows sum to the total. */
+#result article{padding:22px;max-height:96%;border-radius:16px;background:#10282df5}
+.result-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}.result-status{font-size:10px;padding:5px 9px;border-radius:20px;background:#dcfa8f18;color:#dafa8e;white-space:nowrap}
+#result[data-outcome=crash] .result-status{color:#ffbb97;background:#ff9e6218}
+#result h1{font-size:30px;letter-spacing:-1px;margin:10px 0 5px}#result #reason{font-size:11px;line-height:1.6;margin:0 0 12px;color:#a9c1bd}
+#result .result-total{text-align:center;border:1px solid #c5ed9828;border-radius:12px;background:linear-gradient(135deg,#d9ff8910,#d9ff8903);padding:10px 8px;margin-bottom:10px}
+#result .score-caption{display:block;font:10px 'Noto Sans TC',sans-serif;letter-spacing:2px;color:#acc2bc;margin:0}
+#result .score strong{font-size:66px;line-height:1.1;font-variant-numeric:tabular-nums}#result .score div>span{color:#b4c7c2;font-size:12px;margin-left:6px}
+#result .record{display:block;font:10px 'Noto Sans TC',sans-serif;color:#a3b9b3;margin:2px 0 0}#result .record.is-new{color:#ffe278}
+.result-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 10px}.result-stats>div{padding:8px 12px;border-radius:8px;background:#ffffff06}.result-stats span{display:block;font-size:10px;color:#a6bfba}.result-stats strong{display:block;margin-top:3px;font:600 24px 'Barlow Condensed',sans-serif;font-variant-numeric:tabular-nums}.result-stats small{font:10px 'Noto Sans TC',sans-serif;color:#94aca6}
+#result #breakdown{white-space:normal;margin:0 0 14px;font-size:11px;line-height:1.4}.score-details>div{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #ffffff10;gap:6px}.score-details dt{color:#d1dfd8}.score-details dt small{font-size:9px;color:#829f97;margin-left:5px}.score-details dd{margin:0;color:#ddff89;font-weight:700;font-size:16px;font-variant-numeric:tabular-nums}.score-details dd.zero{color:#69867e}
+.result-actions{display:grid;gap:10px}.result-actions>button.image-button{width:100%;height:auto;aspect-ratio:360/58}.result-actions #more-games{margin:0;width:100%;height:auto}
+@container(max-width:350px){#result article{padding:14px}#result h1{font-size:25px;margin:6px 0 4px}#result #reason{font-size:10px;margin-bottom:8px}#result .result-total{padding:6px;margin-bottom:7px}#result .score strong{font-size:48px}.result-stats{margin-bottom:5px}.result-stats>div{padding:6px 9px}.result-stats strong{font-size:21px}.score-details>div{padding:6px 0}.score-details dt small{font-size:8px}.score-details dd{font-size:14px}#result #breakdown{margin-bottom:10px}.result-actions{gap:8px}}
+
+#result article{padding:18px;scrollbar-width:thin;scrollbar-color:#4a6860 #10282d}#result h1{font-size:28px}#result .result-total{padding:8px}#result .score strong{font-size:58px}#result .score-details>div{padding:6px 0}@container(max-width:350px){#result article{padding:14px}#result h1{font-size:25px}#result .score strong{font-size:48px}#result .result-total{padding:6px}}
