@@ -1,16 +1,26 @@
+import {createDrivingMusic} from './music.js?v=2.8.5';
 // Procedural Web Audio: no downloads, reusable loops, soft gain envelopes.
 export class VehicleAudio {
- constructor(){this.enabled=false;this.jetsOn=[false,false];}
+ constructor(){this.enabled=false;this.jetsOn=[false,false];this.stuck=false;}
  enable(value){this.enabled=value;if(value)this.unlock();if(this.ctx)this.master.gain.setTargetAtTime(value?.5:0,this.ctx.currentTime,.015);}
  unlock(){
   if(!this.enabled)return;
   if(!this.ctx){
    const Audio=globalThis.AudioContext||globalThis.webkitAudioContext;if(!Audio)return;
    this.ctx=new Audio();const c=this.ctx;
-   this.master=c.createGain();this.master.gain.value=.5;this.master.connect(c.destination);
+   this.master=c.createGain();this.master.gain.value=.5;this.compressor=c.createDynamicsCompressor();this.compressor.threshold.value=-18;this.compressor.ratio.value=4;this.compressor.attack.value=.005;this.compressor.release.value=.2;
+   this.master.connect(this.compressor);this.compressor.connect(c.destination);
    this.motor=c.createGain();this.motor.gain.value=0;this.motor.connect(this.master);
-   this.oscillators=[90,180].map((f,i)=>{const o=c.createOscillator();o.type=i?'sine':'triangle';o.frequency.value=f;o.connect(this.motor);o.start();return o;});
+   this.oscillators=[90,180,360].map((f,i)=>{const o=c.createOscillator();o.type=i?'sine':'triangle';o.frequency.value=f;const harmonic=c.createGain();harmonic.gain.value=[.7,.24,.1][i];o.connect(harmonic);harmonic.connect(this.motor);o.start();return o;});
    this.noise=c.createBuffer(1,c.sampleRate*2,c.sampleRate);const data=this.noise.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=Math.random()*2-1;
+   this.musicGain=c.createGain();this.musicGain.gain.value=0;this.musicGain.connect(this.master);
+   this.music=c.createBufferSource();this.music.buffer=createDrivingMusic(c);this.music.loop=true;this.music.connect(this.musicGain);this.music.start();
+   this.suction=c.createGain();this.suction.gain.value=0;this.suction.connect(this.master);
+   const suctionNoise=c.createBufferSource();suctionNoise.buffer=this.noise;suctionNoise.loop=true;
+   this.suctionFilter=c.createBiquadFilter();this.suctionFilter.type='bandpass';this.suctionFilter.frequency.value=420;this.suctionFilter.Q.value=2;
+   suctionNoise.connect(this.suctionFilter);this.suctionFilter.connect(this.suction);suctionNoise.start();
+   this.magnet=c.createOscillator();this.magnet.type='sine';this.magnet.frequency.value=95;
+   const magnetGain=c.createGain();magnetGain.gain.value=.24;this.magnet.connect(magnetGain);magnetGain.connect(this.suction);this.magnet.start();
    this.jets=[-.65,.65].map(pan=>{const n=c.createBufferSource();n.buffer=this.noise;n.loop=true;const filter=c.createBiquadFilter();filter.type='bandpass';filter.frequency.value=1600;filter.Q.value=.55;const gain=c.createGain();gain.gain.value=0;const stereo=c.createStereoPanner();stereo.pan.value=pan;n.connect(filter);filter.connect(gain);gain.connect(stereo);stereo.connect(this.master);n.start();return {gain,filter};});
   }
   if(this.ctx.state==='suspended')this.ctx.resume().catch(()=>{});
@@ -19,7 +29,7 @@ export class VehicleAudio {
   if(!this.enabled)return;this.unlock();if(!this.ctx)return;const c=this.ctx,t=c.currentTime,o=c.createOscillator(),v=c.createGain();o.frequency.setValueAtTime(freq,t);v.gain.setValueAtTime(.001,t);v.gain.linearRampToValueAtTime(.12,t+.015);v.gain.exponentialRampToValueAtTime(.001,t+duration);o.connect(v);v.connect(this.master);o.start();o.stop(t+duration+.02);o.onended=()=>{o.disconnect();v.disconnect();};
  }
  startup(){
-  if(!this.enabled)return;this.unlock();if(!this.ctx)return;const c=this.ctx,t=c.currentTime,o=c.createOscillator(),v=c.createGain();o.type='triangle';o.frequency.setValueAtTime(65,t);o.frequency.exponentialRampToValueAtTime(420,t+.55);o.frequency.exponentialRampToValueAtTime(150,t+.9);v.gain.setValueAtTime(.001,t);v.gain.linearRampToValueAtTime(.2,t+.1);v.gain.exponentialRampToValueAtTime(.001,t+.95);o.connect(v);v.connect(this.master);o.start();o.stop(t+1);o.onended=()=>{o.disconnect();v.disconnect();};
+  if(!this.enabled)return;this.unlock();if(!this.ctx)return;const c=this.ctx,t=c.currentTime,o=c.createOscillator(),v=c.createGain();o.type='triangle';o.frequency.setValueAtTime(65,t);o.frequency.exponentialRampToValueAtTime(620,t+.55);o.frequency.exponentialRampToValueAtTime(150,t+.9);v.gain.setValueAtTime(.001,t);v.gain.linearRampToValueAtTime(.3,t+.1);v.gain.exponentialRampToValueAtTime(.001,t+.95);o.connect(v);v.connect(this.master);o.start();o.stop(t+1);o.onended=()=>{o.disconnect();v.disconnect();};
  }
  landing(crash,perfect){
   if(!this.enabled)return;this.unlock();if(!this.ctx)return;
@@ -34,8 +44,15 @@ export class VehicleAudio {
   if(!this.ctx)return;const t=this.ctx.currentTime;
   this.master.gain.setTargetAtTime(this.enabled&&!paused?.5:0,t,.015);
   const driving=active&&g.phase==='track',speed=Math.min(1,g.v/20);
-  this.motor.gain.setTargetAtTime(driving?(input.drive?.075+.065*speed:.035*speed):0,t,.08);
-  this.oscillators.forEach((o,i)=>o.frequency.setTargetAtTime((75+speed*230+(input.drive?35:0))*(i+1),t,.08));
+  this.motor.gain.setTargetAtTime(driving?(input.drive?.18+.14*speed:.055*speed):0,t,.08);
+  this.oscillators.forEach((o,i)=>o.frequency.setTargetAtTime((65+speed*520+(input.drive?50:0))*[1,2,4][i],t,.08));
+  const attached=active&&g.phase==='track'&&!!input.stick&&g.air>0&&g.pitch>.08;
+  if(attached&&!this.stuck)this.cue(230,.09);
+  this.suction.gain.setTargetAtTime(attached?.3+.12*Math.sin(t*27)**2:0,t,attached?.045:.07);
+  this.suctionFilter.frequency.setTargetAtTime(350+speed*550,t,.09);
+  this.magnet.frequency.setTargetAtTime(85+speed*70,t,.08);this.stuck=attached;
+  // Keep music behind the motor and jets, ducking it during the result/explosion.
+  this.musicGain.gain.setTargetAtTime(this.enabled&&!paused?(active?.36:.18):0,t,.2);
   this.jets.forEach((jet,i)=>{
    const on=active&&g.air>0&&!!input[i?'right':'left'];
    if(on&&!this.jetsOn[i]){jet.gain.gain.cancelScheduledValues(t);jet.gain.gain.setValueAtTime(.5,t);}

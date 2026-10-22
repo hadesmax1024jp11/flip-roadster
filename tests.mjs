@@ -159,3 +159,11 @@ test('flight distance stays zero until crossing start and ignores lateral displa
  const short={...fresh(),phase:'flight',x:START+3,y:2,roll:Math.PI,vy:-20};
  while(short.phase!=='done')step(short,{},1/120);assert.equal(short.result.distance,0);assert.equal(short.result.distancePoints,0);
 });
+
+test('original music loop has finite audible samples and click-free endpoints',async()=>{
+ const {createDrivingMusic}=await import('./dist/music.js');
+ const context={sampleRate:8000,createBuffer(channels,length,rate){const samples=new Float32Array(length);return {length,sampleRate:rate,getChannelData(){return samples;}};}};
+ const buffer=createDrivingMusic(context),samples=buffer.getChannelData(0);let peak=0,energy=0;
+ for(const sample of samples){assert.ok(Number.isFinite(sample));peak=Math.max(peak,Math.abs(sample));energy+=sample*sample;}
+ assert.ok(peak>.1&&peak<1);assert.ok(energy/samples.length>.001);assert.equal(samples[0],0);assert.equal(samples.at(-1),0);assert.ok(buffer.length/context.sampleRate>17);
+});
