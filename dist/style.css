@@ -26,3 +26,5 @@ article>button.image-button{height:48px;width:100%}
 .bottom #restart{width:56px}.bottom #pause,.bottom #help{width:31px}.bottom #sound{width:70px}
 @container(max-width:350px){.controls button{padding:0}.stage{bottom:100px}#paused{bottom:128px}.bottom nav{gap:5px}}
 @container(min-width:351px){.stage{bottom:130px}#paused{bottom:158px}}
+
+#more-games{display:flex;align-items:center;justify-content:center;width:100%;height:48px;margin-top:10px;text-decoration:none;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}#more-games img{display:block;max-width:100%;max-height:100%;pointer-events:none;-webkit-user-drag:none}#more-games:focus-visible{outline:3px solid white;outline-offset:3px;border-radius:6px}

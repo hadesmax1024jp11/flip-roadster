@@ -8,3 +8,5 @@ const icons={stick:'<path d="M38 39v20a22 22 0 0 0 44 0V39H68v20a8 8 0 0 1-16 0V
 for(const [name,label,key] of [['stick','吸附','X'],['left','左噴射','←'],['right','右噴射','→'],['drive','加速','SPACE']])svg(name,120,132,text(60,22,13,key)+icons[name]+text(60,112,22,label),name==='drive'?'#dbfa8f':'#173037',name==='drive'?'#19342e':'#e6efea');
 for(const [name,label] of [['start','開始試駕  ↗'],['again','再試一次  ↗']])svg(name,360,58,text(180,38,22,label),'#dbfa8f','#19342e');
 for(const [name,label] of [['restart','↻ 重來'],['pause','Ⅱ'],['resume','▶'],['sound-off','音效 OFF'],['sound-on','音效 ON'],['help','?']])svg(name,name.startsWith('sound')?100:name==='restart'?80:44,40,text(name.startsWith('sound')?50:name==='restart'?40:22,27,name==='help'?24:16,label));
+
+svg('more-games',360,58,text(180,38,22,'解鎖更多遊戲  ↗'),'#244b58','#ddff89');
