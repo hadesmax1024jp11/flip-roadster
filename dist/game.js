@@ -3,7 +3,7 @@ import {VehicleAudio} from './audio.js?v=14';
 import {LandingEffects} from './landing-effects.js?v=23';
 import * as THREE from './vendor/three.module.js';
 import {createRoadster} from './roadster.js?v=5';
-import {fresh,step,R,WALL,pose,END,AIR_CAPACITY,REST_HEIGHT,groundEffect,groundHeight} from './physics.js?v=2.8.1';
+import {fresh,step,R,WALL,pose,END,AIR_CAPACITY,REST_HEIGHT,groundEffect,groundHeight} from './physics.js?v=2.8.3';
 const $=id=>document.getElementById(id),host=$('scene');let renderer;
 try{renderer=new THREE.WebGLRenderer({antialias:true});}catch(e){$('hint').textContent='此裝置無法啟動 WebGL，請使用支援 WebGL 的瀏覽器。';$('start').disabled=true;throw e;}
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;host.appendChild(renderer.domElement);
@@ -71,8 +71,8 @@ function finish(){
  // Truncate the displayed range to avoid rounding 37.99 m to 38.0 with 75 points.
  $('resultDistance').replaceChildren(document.createTextNode((Math.floor(r.distance*10)/10).toFixed(1)+' '));const unit=document.createElement('small');unit.textContent='m';$('resultDistance').append(unit);
  $('resultRolls').replaceChildren(document.createTextNode(r.rolls.toFixed(2)+' '));const turns=document.createElement('small');turns.textContent='圈';$('resultRolls').append(turns);
- const bonus=r.ok?(r.bonus||0):0,landing=r.score-r.distancePoints-bonus;
- for(const [id,value] of [['distancePoints',r.distancePoints],['landingPoints',landing],['perfectPoints',bonus]]){const el=$(id);el.textContent='+'+value.toLocaleString('zh-TW');el.classList.toggle('zero',value===0);}
+ const bonus=r.ok?(r.bonus||0):0,rotation=r.ok?r.rotation:0,landing=r.score-r.distancePoints-bonus-rotation;
+ for(const [id,value] of [['distancePoints',r.distancePoints],['rotationPoints',rotation],['landingPoints',landing],['perfectPoints',bonus]]){const el=$(id);el.textContent='+'+value.toLocaleString('zh-TW');el.classList.toggle('zero',value===0);}
  $('perfectNote').textContent=r.perfect?'達成 +50 獎勵':'未達成';
  if(newRecord){best=r.score;$('best').textContent=best;try{localStorage.setItem('flip-best',best)}catch{}}
  $('record').textContent=(newRecord?'新紀錄 · ':'最佳紀錄 ')+best.toLocaleString('zh-TW')+' 分';$('record').classList.toggle('is-new',newRecord);

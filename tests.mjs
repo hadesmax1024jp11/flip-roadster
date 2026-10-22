@@ -142,3 +142,9 @@ test('paired jets rescue a low descending car but no jets or empty air still cra
   for(const empty of [false,true]){const crash={...base,air:empty?0:100};for(let i=0;i<.6/dt&&crash.phase!=='done';i++)step(crash,{left:empty,right:empty},dt);assert.equal(crash.phase,'done');}
  }
 });
+
+test('rotation contributes 100 points per turn independently from landing and distance',()=>{
+ const base={...fresh(),vy:-2,flightDistance:20};const baseline=grade(base);
+ for(const turns of [.25,.5,1,2,3]){const r=grade({...base,travel:turns*Math.PI*2});assert.equal(r.rotation,turns*100);assert.equal(r.score-baseline.score,turns*100);assert.equal(r.score,r.distancePoints+r.rotation+r.soft+r.level+r.bonus);}
+ const crash=grade({...base,roll:Math.PI,travel:6*Math.PI});assert.equal(crash.ok,false);assert.equal(crash.score,40);
+});
