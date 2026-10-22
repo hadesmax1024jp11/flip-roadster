@@ -9,4 +9,4 @@ for(const [name,label,key] of [['stick','吸附','X'],['left','左噴射','←']
 for(const [name,label] of [['start','開始試駕  ↗'],['again','再試一次  ↗']])svg(name,360,58,text(180,38,22,label),'#dbfa8f','#19342e');
 for(const [name,label] of [['restart','↻ 重來'],['pause','Ⅱ'],['resume','▶'],['sound-off','音效 OFF'],['sound-on','音效 ON'],['help','?']])svg(name,name.startsWith('sound')?100:name==='restart'?80:44,40,text(name.startsWith('sound')?50:name==='restart'?40:22,27,name==='help'?24:16,label));
 
-svg('more-games',360,58,text(180,38,22,'解鎖更多遊戲  ↗'),'#244b58','#ddff89');
+fs.writeFileSync(new URL('more-games.svg',dir),`<svg xmlns="http://www.w3.org/2000/svg" width="360" height="58" viewBox="0 0 360 58"><defs><linearGradient id="gold" x2="0" y2="1"><stop stop-color="#fff09a"/><stop offset=".48" stop-color="#ffce39"/><stop offset="1" stop-color="#ff922b"/></linearGradient></defs><rect x="1.5" y="1.5" width="357" height="55" rx="12" fill="url(#gold)" stroke="#fff4b8" stroke-width="3"/><text x="180" y="38" fill="#462006" font-family="Arial,Microsoft JhengHei,sans-serif" font-size="23" font-weight="900" text-anchor="middle">解鎖更多遊戲  ↗</text></svg>`);
