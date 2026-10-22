@@ -73,8 +73,21 @@ function finish(){
  $('perfectNote').textContent=r.perfect?'達成 +50 獎勵':'未達成';
  if(newRecord){best=r.score;$('best').textContent=best;try{localStorage.setItem('flip-best',best)}catch{}}
  $('record').textContent=(newRecord?'新紀錄 · ':'最佳紀錄 ')+best.toLocaleString('zh-TW')+' 分';$('record').classList.toggle('is-new',newRecord);
- $('result').classList.remove('hidden');
+ $('result').classList.remove('hidden');fitResult();
 }
+
+// Fit the complete report, including both actions, without a scroll container.
+function fitResult(){
+ const overlay=$('result'),card=overlay.querySelector('article');
+ if(overlay.classList.contains('hidden'))return;
+ const style=getComputedStyle(overlay);
+ const available=overlay.clientHeight-parseFloat(style.paddingTop)-parseFloat(style.paddingBottom);
+ const scale=Math.min(1,available/Math.max(card.offsetHeight,card.scrollHeight));
+ card.style.setProperty('--report-scale',Math.max(.01,scale));
+}
+const reportObserver=new ResizeObserver(fitResult);
+reportObserver.observe($('result'));reportObserver.observe($('result').querySelector('article'));
+document.fonts.ready.then(fitResult);
 
 const qPitch=new THREE.Quaternion(),qRoll=new THREE.Quaternion(),axisZ=new THREE.Vector3(0,0,1),axisX=new THREE.Vector3(1,0,0);let last=performance.now(),acc=0;
 function frame(now){requestAnimationFrame(frame);const dt=Math.min((now-last)/1000,.05);last=now;if(running&&!paused){acc+=dt;while(acc>=1/120){step(g,input,1/120);acc-=1/120;}if(g.phase==='done'&&!shown){shown=true;const crash=!g.result.ok&&!!g.impactKind;if(g.impactKind){landingFX.trigger(g,crash,g.result.perfect);sfx.landing(crash,g.result.perfect);}else tone(130,.4);reportDelay=crash?2.8:.65;}}if(!paused){landingFX.update(dt);if(reportDelay>=0){reportDelay-=dt;if(reportDelay<0)finish();}}car.visible=!(g.phase==='done'&&!g.result.ok&&g.impactKind&&landingFX.age>.12);sfx.update(g,input,running&&!paused&&g.phase!=='done',paused||!running);car.position.set(g.x,g.y,g.z);qPitch.setFromAxisAngle(axisZ,g.pitch);qRoll.setFromAxisAngle(axisX,g.roll);car.quaternion.copy(qPitch).multiply(qRoll);flames.forEach((f,i)=>{f.visible=running&&!paused&&g.phase!=='done'&&g.air>0&&input[f.userData.side];f.scale.y=.95+Math.sin(now*.045+i*1.7)*.16;});

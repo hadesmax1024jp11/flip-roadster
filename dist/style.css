@@ -56,3 +56,17 @@ article>button.image-button{height:48px;width:100%}
 @container(max-width:350px){#result article{padding:14px}#result h1{font-size:25px;margin:6px 0 4px}#result #reason{font-size:10px;margin-bottom:8px}#result .result-total{padding:6px;margin-bottom:7px}#result .score strong{font-size:48px}.result-stats{margin-bottom:5px}.result-stats>div{padding:6px 9px}.result-stats strong{font-size:21px}.score-details>div{padding:6px 0}.score-details dt small{font-size:8px}.score-details dd{font-size:14px}#result #breakdown{margin-bottom:10px}.result-actions{gap:8px}}
 
 #result article{padding:18px;scrollbar-width:thin;scrollbar-color:#4a6860 #10282d}#result h1{font-size:28px}#result .result-total{padding:8px}#result .score strong{font-size:58px}#result .score-details>div{padding:6px 0}@container(max-width:350px){#result article{padding:14px}#result h1{font-size:25px}#result .score strong{font-size:48px}#result .result-total{padding:6px}}
+
+/* Keep the entire report on one screen, including short mobile viewports. */
+#result{padding:12px;overflow:clip}
+#result article{max-height:none;overflow:visible;flex-shrink:0;transform:scale(var(--report-scale,1));transform-origin:center}
+@container(max-width:350px){
+ #result article{padding:12px}
+ #result h1{font-size:23px;margin:5px 0 3px}
+ #result .score strong{font-size:42px}
+ #result .result-total{padding:5px;margin-bottom:5px}
+ #result .result-stats>div{padding:5px 8px}
+ #result .score-details>div{padding:5px 0}
+ #result #breakdown{margin-bottom:8px}
+ .result-actions{gap:7px}
+}
