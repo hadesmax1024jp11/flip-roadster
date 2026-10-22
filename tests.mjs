@@ -61,7 +61,7 @@ test('paired thrust adds lift, tilt changes direction, release restores gravity'
  const before=both.vy;step(both,{},.01);assert.ok(both.vy<before);
 });
 
-test('perfect landing earns 50 bonus; tilted hard or spinning contacts do not',()=>{const base={...fresh(),vy:-2};const perfect=grade(base);assert.equal(perfect.bonus,50);assert.equal(perfect.perfect,true);for(const change of [{roll:.2},{vy:-4},{omega:1},{roll:Math.PI}]){const r=grade({...base,...change});assert.equal(r.bonus,0);assert.equal(r.perfect,false);}assert.equal(perfect.score,94);});
+test('perfect landing earns 50 bonus; tilted hard or spinning contacts do not',()=>{const base={...fresh(),vy:-2};const perfect=grade(base);assert.equal(perfect.bonus,50);assert.equal(perfect.perfect,true);for(const change of [{roll:.6},{vy:-4},{omega:1},{roll:Math.PI}]){const r=grade({...base,...change});assert.equal(r.bonus,0);assert.equal(r.perfect,false);}assert.equal(perfect.score,94);});
 
 test('nose-down trim gives jet-powered forward thrust in both headings, without free propulsion',()=>{
  for(const dt of [1/60,1/120,1/240])for(const direction of [-1,1]){
@@ -103,4 +103,15 @@ test('distance excludes runway driving vertical hovering and return travel',()=>
  const hover={...fresh(),phase:'flight',x:-30,y:100,vy:5};for(let i=0;i<120;i++)step(hover,{},1/120);assert.equal(hover.flightDistance,0);
  const crash={...fresh(),phase:'flight',x:-30,y:2,roll:Math.PI,vy:-20,vx:10};while(crash.phase!=='done')step(crash,{},1/120);assert.equal(crash.result.score,crash.result.distancePoints);assert.ok(crash.result.distance>0);
  assert.equal(fresh().flightDistance,0);
+});
+
+test('perfect landing accepts tilts below 30 degrees without the old 24 degree gate',()=>{
+ const base={...fresh(),vy:-2};
+ for(const degrees of [8,23,24,29,29.99])for(const axis of ['pitch','roll']){
+  const result=grade({...base,[axis]:degrees*Math.PI/180});
+  assert.equal(result.ok,true);assert.equal(result.perfect,true);assert.equal(result.bonus,50);
+ }
+ for(const change of [{roll:Math.PI/6},{roll:31*Math.PI/180},{roll:25*Math.PI/180,vy:-3},{roll:25*Math.PI/180,omega:.5}]){
+  const result=grade({...base,...change});assert.equal(result.perfect,false);assert.equal(result.bonus,0);assert.equal(result.ok,false);
+ }
 });
