@@ -1,0 +1,278 @@
+{
+  "env/sky_dome.jpg": {
+    "size": [
+      2048,
+      1024
+    ]
+  },
+  "env/env_studio.hdr": {
+    "size": [
+      1024,
+      512
+    ],
+    "colorSpace": "linear RGBE"
+  },
+  "env/ground_concrete_albedo.jpg": {
+    "size": [
+      1024,
+      1024
+    ]
+  },
+  "env/ground_concrete_normal.png": {
+    "size": [
+      1024,
+      1024
+    ],
+    "colorSpace": "linear"
+  },
+  "env/ground_concrete_orm.jpg": {
+    "size": [
+      1024,
+      1024
+    ],
+    "colorSpace": "linear"
+  },
+  "env/runway_asphalt_albedo.jpg": {
+    "size": [
+      1024,
+      1024
+    ]
+  },
+  "env/runway_asphalt_normal.png": {
+    "size": [
+      1024,
+      1024
+    ],
+    "colorSpace": "linear"
+  },
+  "env/ramp_surface_albedo.png": {
+    "size": [
+      512,
+      1024
+    ]
+  },
+  "env/ramp_surface_normal.png": {
+    "size": [
+      512,
+      1024
+    ],
+    "colorSpace": "linear"
+  },
+  "env/party-logo.webp": {
+    "size": [
+      2048,
+      699
+    ]
+  },
+  "env/horizon_far.webp": {
+    "size": [
+      2048,
+      512
+    ]
+  },
+  "env/horizon_mid.webp": {
+    "size": [
+      2048,
+      512
+    ]
+  },
+  "vfx/jet_flame_sheet.png": {
+    "size": [
+      512,
+      1024
+    ],
+    "grid": 4,
+    "frames": 16,
+    "fps": 24,
+    "loop": true,
+    "alpha": "additive black"
+  },
+  "vfx/ground_mist_sheet.png": {
+    "size": [
+      1024,
+      1024
+    ],
+    "grid": 4,
+    "frames": 16,
+    "fps": 16,
+    "loop": false,
+    "alpha": "straight"
+  },
+  "vfx/explosion_fireball_sheet.png": {
+    "size": [
+      1024,
+      1024
+    ],
+    "grid": 6,
+    "frames": 36,
+    "fps": 24,
+    "loop": false,
+    "alpha": "additive black"
+  },
+  "vfx/smoke_plume_sheet.png": {
+    "size": [
+      1024,
+      1024
+    ],
+    "grid": 4,
+    "frames": 16,
+    "fps": 24,
+    "loop": true,
+    "alpha": "straight"
+  },
+  "env/contact_shadow.png": {
+    "size": [
+      256,
+      256
+    ]
+  },
+  "vfx/nozzle_flare.png": {
+    "size": [
+      256,
+      256
+    ]
+  },
+  "vfx/jet_shock_ring.png": {
+    "size": [
+      512,
+      512
+    ]
+  },
+  "vfx/shockwave_ring.png": {
+    "size": [
+      512,
+      512
+    ]
+  },
+  "vfx/scorch_decal.png": {
+    "size": [
+      512,
+      512
+    ]
+  },
+  "vfx/spark_streak.png": {
+    "size": [
+      64,
+      256
+    ]
+  },
+  "car/lamp_glow.png": {
+    "size": [
+      256,
+      64
+    ]
+  },
+  "ui/title_logo.webp": {
+    "size": [
+      1200,
+      420
+    ]
+  },
+  "ui/stamp_perfect.webp": {
+    "size": [
+      600,
+      240
+    ]
+  },
+  "ui/stamp_success.webp": {
+    "size": [
+      600,
+      240
+    ]
+  },
+  "ui/stamp_crash.webp": {
+    "size": [
+      600,
+      240
+    ]
+  },
+  "car/car_livery.png": {
+    "size": [
+      1024,
+      512
+    ]
+  },
+  "car/tyre_sidewall.png": {
+    "size": [
+      512,
+      512
+    ]
+  },
+  "vfx/debris_atlas.png": {
+    "size": [
+      512,
+      512
+    ],
+    "grid": 4,
+    "frames": 16
+  },
+  "vfx/celebrate_atlas.png": {
+    "size": [
+      512,
+      512
+    ],
+    "grid": 4,
+    "frames": 16
+  },
+  "env/landing_pad.png": {
+    "size": [
+      1024,
+      1024
+    ]
+  },
+  "env/runway_marks_atlas.png": {
+    "size": [
+      1024,
+      1024
+    ],
+    "grid": 4,
+    "frames": 16,
+    "cells": [
+      "dash",
+      "forward arrow",
+      "start checker",
+      "number 00",
+      "number 01",
+      "number 02",
+      "number 03",
+      "number 04",
+      "number 05",
+      "number 06",
+      "number 07",
+      "number 08",
+      "number 09",
+      "number 10",
+      "number 11",
+      "number 12"
+    ],
+    "paddingPixels": 8
+  },
+  "vfx/magnet_arc_sheet.png": {
+    "size": [
+      512,
+      512
+    ],
+    "grid": 2,
+    "frames": 4,
+    "fps": 16,
+    "loop": true
+  },
+  "ui/icon-32.png": {
+    "size": [
+      32,
+      32
+    ]
+  },
+  "ui/icon-180.png": {
+    "size": [
+      180,
+      180
+    ]
+  },
+  "ui/icon-512.png": {
+    "size": [
+      512,
+      512
+    ]
+  }
+}
